@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { XMLParser } from 'fast-xml-parser'
-import { readFile, writeFile } from 'node:fs/promises'
+import { readFile, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { getPayload } from 'payload'
 import config from '../src/payload.config'
@@ -27,7 +27,19 @@ const payload = await getPayload({ config })
 const report: string[] = ['# Informe de importación', '', `Exportación: ${path.basename(filename)}`, '']
 const mediaMap = new Map<string, string>()
 const mediaIds = new Map<string, number | string>()
-const publicHtml = content.filter(i => value(i['wp:status']) === 'publish').map(i => value(i['content:encoded'])).join('\n')
+const localFileExists = async (name?: string | null) => {
+  if (!name) return false
+  try { const file = await stat(path.resolve('media', path.basename(name))); return file.isFile() && file.size > 0 } catch { return false }
+}
+const localUrl = (url?: string | null) => {
+  if (!url) throw new Error('Payload no devolvió la URL del archivo local')
+  const pathname = new URL(url, 'http://localhost').pathname
+  if (pathname.includes('/wp-content/uploads/')) throw new Error(`Payload devolvió una URL de WordPress: ${url}`)
+  return pathname
+}
+let downloaded = 0
+let failed = 0
+const publicHtml = content.filter(i => value(i['wp:status']) === 'publish').map(i => value(i['content:encoded']).replace(/\s+srcset="[^"]*"/gi, '')).join('\n')
 const featured = new Set(content.filter(i => value(i['wp:status']) === 'publish').map(i => meta(i)._thumbnail_id).filter(Boolean))
 for (const item of attachments) {
   const id = value(item['wp:post_id']), url = value(item['wp:attachment_url'])
@@ -35,13 +47,18 @@ for (const item of attachments) {
   try {
     const found = await payload.find({ collection: 'media', where: { wordpressId: { equals: Number(id) } }, limit: 1 })
     let doc = found.docs[0]
-    if (!doc) {
+    const needsFile = !doc || !await localFileExists(doc.filename)
+    if (needsFile) {
       const response = await fetch(url); if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const buffer = Buffer.from(await response.arrayBuffer()); const name = decodeURIComponent(new URL(url).pathname.split('/').pop() || `media-${id}`)
-      doc = await payload.create({ collection: 'media', data: { wordpressId: Number(id), alt: meta(item)._wp_attachment_image_alt || '', originalUrl: url }, file: { data: buffer, mimetype: response.headers.get('content-type')?.split(';')[0] || 'application/octet-stream', name, size: buffer.length } })
+      const data = { wordpressId: Number(id), alt: meta(item)._wp_attachment_image_alt || '', originalUrl: url }
+      const file = { data: buffer, mimetype: response.headers.get('content-type')?.split(';')[0] || 'application/octet-stream', name, size: buffer.length }
+      doc = doc ? await payload.update({ collection: 'media', id: doc.id, data, file }) : await payload.create({ collection: 'media', data, file })
     } else { doc = await payload.update({ collection: 'media', id: doc.id, data: { alt: meta(item)._wp_attachment_image_alt || '', originalUrl: url } }) }
-    if (doc.url) mediaMap.set(url, doc.url); mediaIds.set(id, doc.id)
-  } catch (error) { report.push(`- Medio ${id} (${url}): ${String(error)}`) }
+    if (!await localFileExists(doc.filename)) throw new Error('El archivo no quedó guardado en el volumen media')
+    if (needsFile) downloaded++
+    mediaMap.set(url, localUrl(doc.url)); mediaIds.set(id, doc.id)
+  } catch (error) { failed++; report.push(`- Medio ${id} (${url}): ${String(error)}`) }
 }
 // Las variantes de Elementor pueden no existir como adjuntos independientes.
 const embedded = [...new Set(publicHtml.match(/https?:\/\/fisioinvasiva\.cl\/wp-content\/uploads\/[^\s"'<>]+/g) || [])]
@@ -50,16 +67,21 @@ for (const url of embedded) {
   try {
     const existing = await payload.find({ collection: 'media', where: { originalUrl: { equals: url } }, limit: 1 })
     let doc = existing.docs[0]
-    if (!doc) {
+    const needsFile = !doc || !await localFileExists(doc.filename)
+    if (needsFile) {
       const response = await fetch(url); if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const type = response.headers.get('content-type')?.split(';')[0] || ''
       if (!type.startsWith('image/')) throw new Error('El recurso no es una imagen')
       const buffer = Buffer.from(await response.arrayBuffer())
       const name = decodeURIComponent(new URL(url).pathname.split('/').pop() || 'imagen')
-      doc = await payload.create({ collection: 'media', data: { alt: '', originalUrl: url }, file: { data: buffer, mimetype: type, name, size: buffer.length } })
+      const data = { alt: '', originalUrl: url }
+      const file = { data: buffer, mimetype: type, name, size: buffer.length }
+      doc = doc ? await payload.update({ collection: 'media', id: doc.id, data, file }) : await payload.create({ collection: 'media', data, file })
     }
-    if (doc.url) mediaMap.set(url, doc.url)
-  } catch (error) { report.push(`- Imagen ${url}: ${String(error)}`) }
+    if (!await localFileExists(doc.filename)) throw new Error('El archivo no quedó guardado en el volumen media')
+    if (needsFile) downloaded++
+    mediaMap.set(url, localUrl(doc.url))
+  } catch (error) { failed++; report.push(`- Imagen ${url}: ${String(error)}`) }
 }
 for (const item of content) {
   const id = Number(value(item['wp:post_id'])), metadata = meta(item), link = value(item.link)
@@ -79,14 +101,14 @@ for (const item of content) {
   if (shortcodes.length) report.push(`- ${route}: revisar shortcodes ${[...new Set(shortcodes)].join(', ')}`)
   if (metadata._elementor_data) report.push(`- ${route}: contenido exportado de Elementor; revisar composición, widgets e incrustaciones.`)
   const missing = [...new Set(html.match(/https?:\/\/fisioinvasiva\.cl\/wp-content\/uploads\/[^\s"'<>]+/g) || [])]
-  if (missing.length) report.push(`- ${route}: ${missing.length} referencias a imágenes originales no copiadas; revisar antes de cambiar el dominio.`)
+  if (missing.length) { failed++; report.push(`- ${route}: ${missing.length} referencias a imágenes originales no copiadas; contenido no actualizado.`); continue }
   const categories = array<Item>(item.category)
   const status = value(item['wp:status']); const visibility = ['publish', 'draft', 'private', 'pending', 'future'].includes(status) ? status as 'publish' | 'draft' | 'private' | 'pending' | 'future' : 'draft'
   const data = { title: value(item.title) || `Sin título ${id}`, path: route, wordpressId: id, kind: value(item['wp:post_type']) as 'post' | 'page', visibility, publishedAt: value(item['wp:post_date_gmt']) && value(item['wp:post_date_gmt']) !== '0000-00-00 00:00:00' ? value(item['wp:post_date_gmt']).replace(' ', 'T') + 'Z' : undefined, authorName: value(item['dc:creator']), categories: categories.filter(c => c['@_domain'] === 'category').map(value).join(', '), tags: categories.filter(c => c['@_domain'] === 'post_tag').map(value).join(', '), html, featuredImage: mediaIds.get(metadata._thumbnail_id) as number | undefined, seoTitle: metadata.rank_math_title || '', seoDescription: metadata.rank_math_description || '' }
   const found = await payload.find({ collection: 'content', where: { wordpressId: { equals: id } }, limit: 1 })
   if (found.docs[0]) await payload.update({ collection: 'content', id: found.docs[0].id, data }); else await payload.create({ collection: 'content', data })
 }
-report.push('', `Registros de contenido procesados: ${content.length}`, `Adjuntos asociados importados: ${mediaIds.size}`, '', 'Revisar los medios no públicos, el formulario, los títulos SEO con variables de Rank Math y los elementos que no aparezcan en content:encoded. La sincronización sobrescribe los campos importados en Payload.')
+report.push('', `Registros de contenido procesados: ${content.length}`, `Adjuntos asociados importados: ${mediaIds.size}`, `Medios con archivo local verificado: ${mediaMap.size}`, `Archivos descargados o reparados en el volumen: ${downloaded}`, `Errores de medios o contenido: ${failed}`, '', 'Revisar los medios no públicos, el formulario, los títulos SEO con variables de Rank Math y los elementos que no aparezcan en content:encoded. La sincronización sobrescribe los campos importados en Payload.')
 await writeFile('informe-importacion.md', report.join('\n') + '\n')
 console.log(report.join('\n'))
-process.exit(0)
+process.exit(failed ? 1 : 0)

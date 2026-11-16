@@ -1,4 +1,5 @@
 import './styles.css'
+import './institutional.css'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Fisio Invasiva | Kinesiología y fisioterapia invasiva', description: 'Atención personalizada de kinesiología y fisioterapia invasiva en Providencia.' }
