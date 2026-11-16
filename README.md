@@ -14,7 +14,7 @@ La migración inicial de PostgreSQL está en `src/migrations` y Payload la ejecu
 
 Apunta el subdominio al servidor y crea un bloque HTTPS separado en el Nginx existente con `server_name dev.fisioinvasiva.cl`. Usa el proxy de `nginx.example.conf` hacia `127.0.0.1:3000`; deja el bloque de `fisioinvasiva.cl` apuntando a WordPress. Protege el subdominio con autenticación y envía `X-Robots-Tag: noindex, nofollow` para que la copia no aparezca en buscadores.
 
-En el directorio del repositorio del servidor, crea `.env` desde `.env.example`, configura al menos `POSTGRES_PASSWORD` y `PAYLOAD_SECRET`, y ejecuta `docker compose up -d --build`. Abre `https://dev.fisioinvasiva.cl/admin` para crear el primer usuario de Payload. El autor de WordPress se conserva como texto en los artículos importados; su cuenta para publicar en Payload se crea por separado en `/admin`.
+En el directorio del repositorio del servidor, crea `.env` desde `.env.example`, configura al menos `POSTGRES_PASSWORD` y `PAYLOAD_SECRET`, y ejecuta `docker compose up -d --build`. Compose genera `DATABASE_URL` con el host interno `db`; no tienes que definirlo en `.env` para el despliegue. Abre `https://dev.fisioinvasiva.cl/admin` para crear el primer usuario de Payload. El autor de WordPress se conserva como texto en los artículos importados; su cuenta para publicar en Payload se crea por separado en `/admin`.
 
 ## Importación
 
@@ -33,7 +33,7 @@ La exportación encontrada contiene 12 entradas públicas, 6 páginas públicas,
 
 ## Desarrollo local
 
-`npm ci`, configura `DATABASE_URL` y `PAYLOAD_SECRET` en `.env`, y ejecuta `npm run dev`. Para importar o ver el contenido se necesita PostgreSQL. `npm run typecheck` comprueba tipos y `npm run build` compila producción.
+Si ejecutas la app fuera de Docker con `npm run dev`, configura `DATABASE_URL` hacia una instancia de PostgreSQL accesible desde tu PC y `PAYLOAD_SECRET` en `.env`. Para desplegar con Compose, basta con `POSTGRES_PASSWORD` y `PAYLOAD_SECRET`. `npm run typecheck` comprueba tipos y `npm run build` compila producción.
 
 ## Reseñas de Google
 
