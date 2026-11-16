@@ -19,12 +19,12 @@ if (process.argv.includes('--inventory')) {
   const counts: Record<string, number> = {}
   for (const item of content) { const key = `${value(item['wp:post_type'])}:${value(item['wp:status'])}`; counts[key] = (counts[key] || 0) + 1 }
   const ids = content.map(item => value(item['wp:post_id']))
-  if (new Set(ids).size !== ids.length) throw new Error('La exportaci?n contiene IDs duplicados')
+  if (new Set(ids).size !== ids.length) throw new Error('La exportación contiene IDs duplicados')
   console.log(JSON.stringify({ counts, attachments: attachments.length }, null, 2))
   process.exit(0)
 }
 const payload = await getPayload({ config })
-const report: string[] = ['# Informe de importaci?n', '', `Exportaci?n: ${path.basename(filename)}`, '']
+const report: string[] = ['# Informe de importación', '', `Exportación: ${path.basename(filename)}`, '']
 const mediaMap = new Map<string, string>()
 const mediaIds = new Map<string, number | string>()
 const publicHtml = content.filter(i => value(i['wp:status']) === 'publish').map(i => value(i['content:encoded'])).join('\n')
@@ -67,19 +67,26 @@ for (const item of content) {
   let html = value(item['content:encoded'])
   for (const [source, target] of mediaMap) html = html.split(source).join(target)
   html = html.replace(/\s+srcset="[^"]*"/gi, '')
-  const shortcodes = html.match(/\[(?!\/)[a-z][^\]]*\]/gi) || []
+  if (['/', '/testimonios/'].includes(route) && /\[trustindex(?:\s+[^\]]*)?\]/i.test(html)) {
+    html = html.replace(/\[trustindex(?:\s+[^\]]*)?\]/gi, '')
+    report.push(`- ${route}: shortcode Trustindex reemplazado por el componente de reseñas de Google.`)
+  }
+  if (route === '/contacto/' && /\[contact-form-7(?:\s+[^\]]*)?\]/i.test(html)) {
+    html = html.replace(/\[contact-form-7(?:\s+[^\]]*)?\]/gi, '')
+    report.push(`- ${route}: shortcode Contact Form 7 reemplazado por el formulario del sitio.`)
+  }
+  const shortcodes = html.match(/\[(?!\/)[a-z][\w-]*(?:\s+[^\]]*)?\]/gi) || []
   if (shortcodes.length) report.push(`- ${route}: revisar shortcodes ${[...new Set(shortcodes)].join(', ')}`)
-  if (metadata._elementor_data) report.push(`- ${route}: contenido exportado de Elementor; revisar composici?n, widgets e incrustaciones.`)
+  if (metadata._elementor_data) report.push(`- ${route}: contenido exportado de Elementor; revisar composición, widgets e incrustaciones.`)
   const missing = [...new Set(html.match(/https?:\/\/fisioinvasiva\.cl\/wp-content\/uploads\/[^\s"'<>]+/g) || [])]
-  if (missing.length) report.push(`- ${route}: ${missing.length} referencias a im?genes originales no copiadas; revisar antes de cambiar el dominio.`)
-  if (route === '/contacto/') html = html.replace(/\[contact-form-7[^\]]*\]/g, '')
+  if (missing.length) report.push(`- ${route}: ${missing.length} referencias a imágenes originales no copiadas; revisar antes de cambiar el dominio.`)
   const categories = array<Item>(item.category)
   const status = value(item['wp:status']); const visibility = ['publish', 'draft', 'private', 'pending', 'future'].includes(status) ? status as 'publish' | 'draft' | 'private' | 'pending' | 'future' : 'draft'
-  const data = { title: value(item.title) || `Sin t?tulo ${id}`, path: route, wordpressId: id, kind: value(item['wp:post_type']) as 'post' | 'page', visibility, publishedAt: value(item['wp:post_date_gmt']) && value(item['wp:post_date_gmt']) !== '0000-00-00 00:00:00' ? value(item['wp:post_date_gmt']).replace(' ', 'T') + 'Z' : undefined, authorName: value(item['dc:creator']), categories: categories.filter(c => c['@_domain'] === 'category').map(value).join(', '), tags: categories.filter(c => c['@_domain'] === 'post_tag').map(value).join(', '), html, featuredImage: mediaIds.get(metadata._thumbnail_id) as number | undefined, seoTitle: metadata.rank_math_title || '', seoDescription: metadata.rank_math_description || '' }
+  const data = { title: value(item.title) || `Sin título ${id}`, path: route, wordpressId: id, kind: value(item['wp:post_type']) as 'post' | 'page', visibility, publishedAt: value(item['wp:post_date_gmt']) && value(item['wp:post_date_gmt']) !== '0000-00-00 00:00:00' ? value(item['wp:post_date_gmt']).replace(' ', 'T') + 'Z' : undefined, authorName: value(item['dc:creator']), categories: categories.filter(c => c['@_domain'] === 'category').map(value).join(', '), tags: categories.filter(c => c['@_domain'] === 'post_tag').map(value).join(', '), html, featuredImage: mediaIds.get(metadata._thumbnail_id) as number | undefined, seoTitle: metadata.rank_math_title || '', seoDescription: metadata.rank_math_description || '' }
   const found = await payload.find({ collection: 'content', where: { wordpressId: { equals: id } }, limit: 1 })
   if (found.docs[0]) await payload.update({ collection: 'content', id: found.docs[0].id, data }); else await payload.create({ collection: 'content', data })
 }
-report.push('', `Registros de contenido procesados: ${content.length}`, `Adjuntos asociados importados: ${mediaIds.size}`, '', 'Revisar los medios no p?blicos, el formulario, los t?tulos SEO con variables de Rank Math y los elementos que no aparezcan en content:encoded. La sincronizaci?n sobrescribe los campos importados en Payload.')
+report.push('', `Registros de contenido procesados: ${content.length}`, `Adjuntos asociados importados: ${mediaIds.size}`, '', 'Revisar los medios no públicos, el formulario, los títulos SEO con variables de Rank Math y los elementos que no aparezcan en content:encoded. La sincronización sobrescribe los campos importados en Payload.')
 await writeFile('informe-importacion.md', report.join('\n') + '\n')
 console.log(report.join('\n'))
 process.exit(0)
