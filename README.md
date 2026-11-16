@@ -1,67 +1,32 @@
-# Payload Blank Template
+﻿# Fisio Invasiva — migración en desarrollo
 
-This template comes configured with the bare minimum to get started on anything you need.
+**No publicar todavía.** Esta versión requiere ejecutar y revisar la importación completa, comprobar las rutas e imágenes y validar el formulario y la publicación desde Payload. El XML de WordPress no es un respaldo completo.
 
-## Quick start
+## Requisitos y configuración
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+Docker Compose en el servidor y Nginx externo con HTTPS ya instalado. Copia `.env.example` a `.env`; establece una contraseña de PostgreSQL fuerte y alfanumérica y un `PAYLOAD_SECRET` aleatorio largo. Configura SMTP y `CONTACT_FROM` para que el formulario envíe a `CONTACT_TO` (la exportación indica contacto@fisioinvasiva.cl). No subas `.env` ni la exportación a Git.
 
-## Quick Start - local setup
+Ejecuta `docker compose up -d --build`. Solo la app expone el puerto 3000 en 127.0.0.1; PostgreSQL permanece dentro de Docker. En una prueba, usa un hostname privado con autenticación, sin afectar al WordPress activo. El ejemplo `nginx.example.conf` muestra el bloque que se debe adaptar al servidor HTTPS existente. Protege el acceso a la instancia de prueba y crea el primer usuario en `/admin` antes de hacerla accesible; conserva sus credenciales de forma segura.
 
-To spin up this template locally, follow these steps:
+## Importación
 
-### Clone
+Copia la exportación WXR dentro del contenedor con `docker compose cp /ruta/exportacion.xml app:/tmp/wordpress.xml` y ejecuta `docker compose exec app npm run import:wordpress -- /tmp/wordpress.xml --inventory` para inventariar. Ejecuta luego el mismo comando sin `--inventory` para importar. El script actualiza por ID de WordPress y genera `/app/informe-importacion.md`; cópialo fuera con `docker compose cp app:/app/informe-importacion.md ./informe-importacion.md`. Cada sincronización sobrescribe los campos importados: evita editar esos campos en Payload hasta después de la última sincronización.
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+La exportación encontrada contiene 12 entradas públicas, 6 páginas públicas, 1 privada y 105 adjuntos. Revisa el informe: Elementor, widgets, shortcodes, vídeos, formatos de SEO y medios no públicos pueden requerir intervención manual. Las referencias de medios que no puedan descargarse deberán resolverse antes de modificar el dominio. El HTML es editable en Payload como texto HTML; no es una conversión completa al editor visual de WordPress. La página de inicio se implementa por separado y la copia importada no la modifica.
 
-### Development
+## Antes de cambiar el dominio
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+1. Respalda base de datos y archivos completos de WordPress; conserva su configuración Nginx y confirma cómo restaurarlos. Respalda también los volúmenes de PostgreSQL y media de la prueba.
+2. En WordPress congela los cambios editoriales; exporta otra vez e importa la última copia. Revisa el informe y compara totales por estado, contenido, imágenes y URLs. Valida en privado las páginas sensibles. El script no elimina contenido que haya desaparecido de la exportación: compáralo y resuelve diferencias manualmente.
+3. Verifica sitemap, 301 necesarios, rutas, formulario con un envío real, enlace y medición de AgendaPro, y la publicación desde `/admin`. La configuración de medición antigua requiere inspección adicional. No cambies el tráfico si hay fallos o referencias antiguas sin resolver.
+4. Apunta el Nginx HTTPS existente a `127.0.0.1:3000`, comprueba las funciones anteriores en producción y supervisa errores. Si falla una función crítica, restaura la configuración Nginx anterior y vuelve a iniciar WordPress con su base y archivos intactos.
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+## Desarrollo local
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+`npm ci`, configura `DATABASE_URL` y `PAYLOAD_SECRET` en `.env`, y ejecuta `npm run dev`. Para importar o ver el contenido se necesita PostgreSQL. `npm run typecheck` comprueba tipos y `npm run build` compila producción.
 
-#### Docker (Optional)
+## Reseñas de Google
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+La sección muestra un carrusel con flechas, deslizamiento táctil y avance automático cada seis segundos. El avance se pausa al pasar el cursor o mantener el foco y respeta la preferencia de movimiento reducido. Para traer reseñas actuales, habilita Places API (New) y facturación en Google Cloud y configura `GOOGLE_PLACES_API_KEY` en `.env` del contenedor. `GOOGLE_PLACE_ID` es opcional: si falta, la app busca la ficha por nombre y dirección. Google entrega hasta cinco reseñas por relevancia; el carrusel las consulta al abrir la sección, sin almacenarlas. La clave solo se usa en el servidor. Comprueba que la ficha encontrada corresponde a Coyancura 2283 antes de publicar. Sin clave, permanece el enlace directo a Google. Para mostrar todas las reseñas en el sitio se necesitaría acceso OAuth a la ficha verificada mediante Google Business Profile API.
 
-To do so, follow these steps:
-
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
-
-## How it works
-
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
-
-### Collections
-
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
-
-- #### Users (Authentication)
-
-  Users are auth-enabled collections that have access to the admin panel.
-
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
-
-- #### Media
-
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
-
-### Docker
-
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
-
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
-
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
-
-## Questions
-
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+Antes de activar Places, revisa que las páginas públicas de términos y privacidad incluyan los términos y la política de privacidad de Google, como exige la [política de Places API](https://developers.google.com/maps/documentation/places/web-service/policies).

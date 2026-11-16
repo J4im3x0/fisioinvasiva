@@ -39,6 +39,13 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "tests",
+    "oxfmt.config.ts",
+    "playwright.config.ts",
+    "vitest.config.mts",
+    "vitest.setup.ts",
+    "src/collections/Tags.ts",
+    "src/collections/Folders.ts"
   ]
 }

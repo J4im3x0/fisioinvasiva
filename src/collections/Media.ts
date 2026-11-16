@@ -1,20 +1,6 @@
 import type { CollectionConfig } from 'payload'
-
-import { createFolderField, createTagField } from 'payload'
-
 export const Media: CollectionConfig = {
-  slug: 'media',
-  access: {
-    read: () => true,
-  },
-  fields: [
-    {
-      name: 'alt',
-      type: 'text',
-      required: true,
-    },
-    createFolderField({ relationTo: 'folders' }),
-    createTagField({ relationTo: 'tags' }),
-  ],
-  upload: true,
+  slug: 'media', access: { read: () => true },
+  fields: [ { name: 'alt', type: 'text' }, { name: 'wordpressId', type: 'number', unique: true, index: true }, { name: 'originalUrl', type: 'text' } ],
+  upload: { staticDir: 'media' },
 }
