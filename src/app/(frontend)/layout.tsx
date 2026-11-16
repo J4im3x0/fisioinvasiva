@@ -1,6 +1,7 @@
 import './styles.css'
 import './institutional.css'
 import type { Metadata } from 'next'
+import { treatmentCategories, taxonomySlug } from '@/lib/treatment-taxonomy'
 
 export const metadata: Metadata = { title: 'Fisio Invasiva | Kinesiología y fisioterapia invasiva', description: 'Atención personalizada de kinesiología y fisioterapia invasiva en Providencia.' }
 const links = [{ href: '/', text: 'Inicio' }, { href: '/tratamientos/', text: 'Tratamientos' }, { href: '/nosotros/', text: 'Nosotros' }, { href: '/testimonios/', text: 'Testimonios' }, { href: '/contacto/', text: 'Contacto' }]
@@ -9,9 +10,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return <html lang="es-CL"><body>
     <header className="header">
       <div className="header-inner">
-      <details className="mobile-menu"><summary aria-label="Abrir menú"><span></span><span></span><span></span></summary><nav aria-label="Navegación del menú">{menuLinks.map(link => <a key={link.href} href={link.href}>{link.text}</a>)}</nav></details>
+      <details className="mobile-menu"><summary aria-label="Abrir menú"><span></span><span></span><span></span></summary><nav aria-label="Navegación del menú">{menuLinks.map(link => <div key={link.href}><a href={link.href}>{link.text}</a>{link.text === 'Tratamientos' && <div className="mobile-treatment-links">{treatmentCategories.map(category => <a key={category} href={`/tratamientos/${taxonomySlug(category)}/`}>{category}</a>)}</div>}</div>)}</nav></details>
       <a className="brand" href="/" aria-label="Fisio Invasiva, inicio"><img src="/brand/logo.webp" alt="Fisio Invasiva" /></a>
-      <nav className="desktop-nav" aria-label="Navegación principal">{links.map(link => <a key={link.href} href={link.href}>{link.text}</a>)}</nav>
+      <nav className="desktop-nav" aria-label="Navegación principal">{links.map(link => link.text === 'Tratamientos' ? <div className="nav-treatment" key={link.href}><a href={link.href}>{link.text}</a><div className="nav-treatment-menu">{treatmentCategories.map(category => <a key={category} href={`/tratamientos/${taxonomySlug(category)}/`}>{category}</a>)}</div></div> : <a key={link.href} href={link.href}>{link.text}</a>)}</nav>
       <a className="header-phone" href="tel:+56938630890"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="currentColor"/><path d="M6.1 5.7c-.6.6-.6 1.7.1 3.2 1 2.2 2.7 3.9 4.9 4.9 1.5.7 2.6.7 3.2.1l.8-1.2-2.4-1.7-1.1 1c-1.3-.6-2.3-1.6-2.9-2.9l1-1.1L8 5.6l-1.9.1Z" fill="#fff"/></svg>+56 9 3863 0890</a>
       <a className="button button-blue header-cta" href="/agenda">Agendar hora</a>
       </div>

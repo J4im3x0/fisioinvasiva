@@ -1,0 +1,1 @@
+export async function GET(_request: Request, { params }: { params: Promise<{ category: string }> }) { const { category } = await params; return new Response(null, { status: 301, headers: { Location: `/tratamientos/?categoria=${encodeURIComponent(category)}` } }) }

@@ -10,7 +10,7 @@ export const Content: CollectionConfig = {
     { name: 'kind', type: 'select', required: true, options: ['post', 'page'], defaultValue: 'post' },
     { name: 'visibility', label: 'Visibilidad', type: 'select', required: true, options: ['publish', 'draft', 'private', 'pending', 'future'], defaultValue: 'draft' },
     { name: 'publishedAt', type: 'date' }, { name: 'authorName', label: 'Autor', type: 'text' },
-    { name: 'categories', type: 'text' }, { name: 'tags', type: 'text' },
+    { name: 'categories', label: 'Categorías (separadas por comas)', type: 'text' }, { name: 'tags', label: 'Etiquetas (separadas por comas)', type: 'text' },
     { name: 'featuredImage', type: 'relationship', relationTo: 'media' },
     { name: 'html', label: 'Contenido HTML editable', type: 'textarea', admin: { rows: 24 } },
     { name: 'seoTitle', label: 'T?tulo SEO', type: 'text' }, { name: 'seoDescription', label: 'Descripci?n SEO', type: 'textarea' },

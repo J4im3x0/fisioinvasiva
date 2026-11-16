@@ -15,6 +15,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .desktop-nav { display:flex; justify-content:space-around; align-items:center; gap:8px; flex:1; max-width:804px; min-height:56px; margin-left:-5px; border:1px solid #e9e2dc; border-radius:100px; }
 .desktop-nav a,.header-phone { font-size:15px; font-weight:700; text-decoration:none; white-space:nowrap; }
 .desktop-nav a:hover,.header-phone:hover { color:#578dc2; }
+.nav-treatment { height:56px; display:flex; align-items:center; position:relative; }
+.nav-treatment>a { display:flex; align-items:center; height:100%; }
+.nav-treatment-menu { display:none; position:absolute; top:100%; left:50%; width:250px; padding:10px; transform:translateX(-50%); background:#fff; border:1px solid #e9e2dc; border-radius:14px; box-shadow:0 16px 35px #203e7830; }
+.nav-treatment:hover .nav-treatment-menu,.nav-treatment:focus-within .nav-treatment-menu { display:grid; }
+.nav-treatment-menu a { padding:9px 12px; border-radius:7px; }
+.nav-treatment-menu a:hover,.nav-treatment-menu a:focus-visible { background:#eff5fb; }
 .header-phone { margin-left:auto; display:inline-flex; align-items:center; gap:8px; }
 .header-phone svg { width:17px; height:17px; color:#3876ee; flex:none; }
 .header-cta { display:none!important; }
@@ -25,6 +31,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .mobile-menu nav { position:absolute; left:0; top:48px; min-width:230px; display:flex; flex-direction:column; background:#fff; border:1px solid #e9e2dc; border-radius:12px; box-shadow:0 10px 25px #203e7830; padding:10px; }
 .mobile-menu nav a { padding:10px 12px; text-decoration:none; font-weight:700; }
 .mobile-menu nav a:hover { background:#eff5fb; border-radius:6px; }
+.mobile-menu nav>div { display:grid; }
+.mobile-treatment-links { display:grid; padding-left:13px; border-left:2px solid #d7e8f5; }
+.mobile-treatment-links a { font-size:13px; font-weight:500!important; }
 .button { border:0; display:inline-flex; align-items:center; justify-content:center; padding:15px 27px; min-height:50px; border-radius:99px; text-decoration:none; font-size:14px; font-weight:800; cursor:pointer; }
 .button-orange { background:var(--orange); color:#fff; min-width:276px; min-height:72px; font-size:20px; }
 .button-orange:hover { background:#ffb838; }

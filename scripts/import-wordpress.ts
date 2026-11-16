@@ -4,6 +4,7 @@ import { readFile, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { getPayload } from 'payload'
 import config from '../src/payload.config'
+import { renderElementorPost } from './elementor-post'
 
 type Item = Record<string, any>
 const array = <T>(x: T | T[] | undefined): T[] => x === undefined ? [] : Array.isArray(x) ? x : [x]
@@ -26,6 +27,7 @@ if (process.argv.includes('--inventory')) {
 const payload = await getPayload({ config })
 const report: string[] = ['# Informe de importación', '', `Exportación: ${path.basename(filename)}`, '']
 const mediaMap = new Map<string, string>()
+const mediaAlt = new Map<string, string>()
 const mediaIds = new Map<string, number | string>()
 const localFileExists = async (name?: string | null) => {
   if (!name) return false
@@ -39,7 +41,7 @@ const localUrl = (url?: string | null) => {
 }
 let downloaded = 0
 let failed = 0
-const publicHtml = content.filter(i => value(i['wp:status']) === 'publish').map(i => value(i['content:encoded']).replace(/\s+srcset="[^"]*"/gi, '')).join('\n')
+const publicHtml = content.filter(i => value(i['wp:status']) === 'publish').map(i => [value(i['content:encoded']), value(i['wp:post_type']) === 'post' ? meta(i)._elementor_data?.replaceAll('\\/', '/') : ''].join('\n').replace(/\s+srcset="[^"]*"/gi, '')).join('\n')
 const featured = new Set(content.filter(i => value(i['wp:status']) === 'publish').map(i => meta(i)._thumbnail_id).filter(Boolean))
 for (const item of attachments) {
   const id = value(item['wp:post_id']), url = value(item['wp:attachment_url'])
@@ -57,7 +59,7 @@ for (const item of attachments) {
     } else { doc = await payload.update({ collection: 'media', id: doc.id, data: { alt: meta(item)._wp_attachment_image_alt || '', originalUrl: url } }) }
     if (!await localFileExists(doc.filename)) throw new Error('El archivo no quedó guardado en el volumen media')
     if (needsFile) downloaded++
-    mediaMap.set(url, localUrl(doc.url)); mediaIds.set(id, doc.id)
+    mediaMap.set(url, localUrl(doc.url)); mediaAlt.set(url, meta(item)._wp_attachment_image_alt || ''); mediaIds.set(id, doc.id)
   } catch (error) { failed++; report.push(`- Medio ${id} (${url}): ${String(error)}`) }
 }
 // Las variantes de Elementor pueden no existir como adjuntos independientes.
@@ -87,6 +89,11 @@ for (const item of content) {
   const id = Number(value(item['wp:post_id'])), metadata = meta(item), link = value(item.link)
   const route = link ? new URL(link).pathname : `/_wordpress/${id}/`
   let html = value(item['content:encoded'])
+  let reconstructed = false
+  if (value(item['wp:post_type']) === 'post' && metadata._elementor_data) {
+    try { html = renderElementorPost(JSON.parse(metadata._elementor_data), mediaMap, mediaAlt); reconstructed = true }
+    catch (error) { report.push(`- ${route}: no se pudo reconstruir la composición de Elementor: ${String(error)}`) }
+  }
   for (const [source, target] of mediaMap) html = html.split(source).join(target)
   html = html.replace(/\s+srcset="[^"]*"/gi, '')
   if (['/', '/testimonios/'].includes(route) && /\[trustindex(?:\s+[^\]]*)?\]/i.test(html)) {
@@ -99,7 +106,8 @@ for (const item of content) {
   }
   const shortcodes = html.match(/\[(?!\/)[a-z][\w-]*(?:\s+[^\]]*)?\]/gi) || []
   if (shortcodes.length) report.push(`- ${route}: revisar shortcodes ${[...new Set(shortcodes)].join(', ')}`)
-  if (metadata._elementor_data) report.push(`- ${route}: contenido exportado de Elementor; revisar composición, widgets e incrustaciones.`)
+  if (reconstructed) report.push(`- ${route}: columnas, imágenes, listas y videos de Elementor reconstruidos en HTML editable.${metadata._elementor_data.includes('"widgetType":"slides"') ? ' El carrusel de imágenes se muestra como galería.' : ''}`)
+  else if (metadata._elementor_data) report.push(`- ${route}: contenido exportado de Elementor; revisar composición, widgets e incrustaciones.`)
   const missing = [...new Set(html.match(/https?:\/\/fisioinvasiva\.cl\/wp-content\/uploads\/[^\s"'<>]+/g) || [])]
   if (missing.length) { failed++; report.push(`- ${route}: ${missing.length} referencias a imágenes originales no copiadas; contenido no actualizado.`); continue }
   const categories = array<Item>(item.category)

@@ -1,0 +1,1 @@
+export async function GET(_request: Request, { params }: { params: Promise<{ tag: string }> }) { const { tag } = await params; return new Response(null, { status: 301, headers: { Location: `/tratamientos/?tag=${encodeURIComponent(tag)}` } }) }
