@@ -12,7 +12,7 @@ La migración inicial de PostgreSQL está en `src/migrations` y Payload la ejecu
 
 ## Prueba en dev.fisioinvasiva.cl
 
-Apunta el subdominio al servidor y crea un bloque HTTPS separado en el Nginx existente con `server_name dev.fisioinvasiva.cl`. Usa el proxy de `nginx.example.conf` hacia `127.0.0.1:3000`; deja el bloque de `fisioinvasiva.cl` apuntando a WordPress. Protege el subdominio con autenticación y envía `X-Robots-Tag: noindex, nofollow` para que la copia no aparezca en buscadores.
+Apunta el subdominio al servidor y crea un bloque HTTPS separado en el Nginx existente con `server_name dev.fisioinvasiva.cl`. Usa `nginx.dev.conf` como archivo de sitio: incluye el proxy a `127.0.0.1:3000`, los certificados, la autenticación HTTP y `X-Robots-Tag: noindex, nofollow`. Crea `/etc/nginx/.htpasswd-fisio-dev` antes de activar el archivo, verifica que el certificado del servidor cubra `dev.fisioinvasiva.cl` y activa Authenticated Origin Pulls en Cloudflare. Deja el bloque de `fisioinvasiva.cl` apuntando a WordPress.
 
 En el directorio del repositorio del servidor, crea `.env` desde `.env.example`, configura al menos `POSTGRES_PASSWORD` y `PAYLOAD_SECRET`, y ejecuta `docker compose up -d --build`. Compose genera `DATABASE_URL` con el host interno `db`; no tienes que definirlo en `.env` para el despliegue. Abre `https://dev.fisioinvasiva.cl/admin` para crear el primer usuario de Payload. El autor de WordPress se conserva como texto en los artículos importados; su cuenta para publicar en Payload se crea por separado en `/admin`.
 
