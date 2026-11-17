@@ -1,6 +1,8 @@
 import GoogleReviews from './google-reviews'
 import TreatmentCarousel from './treatment-carousel'
 
+export const dynamic = 'force-dynamic'
+
 const invasivos = [
   { title: 'Electrólisis percutánea', image: 'electrolisis.webp', href: '/electrolisis-percutanea/', description: 'Electrólisis percutánea (EPI-EPM ECO ®). Técnica efectiva y de rápida aplicación.' },
   { title: 'Ecografía musculoesquelética', image: 'ecografia.webp', href: '/ecografia-musculoesqueletica/', description: 'Ecografía musculoesquelética (ECO MSK ®).' },

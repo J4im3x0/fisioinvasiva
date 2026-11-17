@@ -127,6 +127,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .google-reviews-heading h2 { flex-basis:100%; margin:0; font-size:clamp(28px,3vw,40px); line-height:1.15; }
 .google-reviews-heading p { margin:0; font-weight:700; }
 .google-reviews-heading .button { margin-left:auto; }
+.revys-reviews { margin-top:26px; max-width:100%; overflow:hidden; }
 .google-review-carousel { margin-top:26px; }
 .google-review-controls { display:flex; justify-content:flex-end; gap:10px; margin-bottom:12px; }
 .google-review-controls button { width:42px; height:42px; border:1px solid #cbdceb; border-radius:50%; background:#fff; color:var(--blue); font:700 30px/1 Arial,sans-serif; cursor:pointer; }
