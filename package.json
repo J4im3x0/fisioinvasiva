@@ -11,6 +11,7 @@
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap",
     "import:wordpress": "tsx scripts/import-wordpress.ts",
+    "google:locations": "tsx scripts/google-business-locations.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

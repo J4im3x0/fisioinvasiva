@@ -1,68 +1,28 @@
-const reviewUrl = 'https://share.google/ay32o4HwwQOiA1uTV'
-
-type Place = {
-  id?: string
-  displayName?: { text?: string }
-  formattedAddress?: string
-  googleMapsUri?: string
-  rating?: number
-  userRatingCount?: number
-  reviews?: {
-    rating?: number
-    text?: { text?: string }
-    authorAttribution?: { displayName?: string; uri?: string; photoUri?: string }
-    googleMapsUri?: string
-    publishTime?: string
-    relativePublishTimeDescription?: string
-  }[]
-}
+import { businessReviews, googleReviewsUrl } from '@/lib/google-business-reviews'
+import type { BusinessCredentials } from '@/lib/google-business-reviews'
 
 export const dynamic = 'force-dynamic'
 
+let cached: { value: Awaited<ReturnType<typeof businessReviews>>; until: number } | undefined
+let pending: Promise<Awaited<ReturnType<typeof businessReviews>>> | undefined
+
 export async function GET() {
-  const key = process.env.GOOGLE_PLACES_API_KEY
-  if (!key) return Response.json({ status: 'unconfigured', url: reviewUrl }, { headers: { 'Cache-Control': 'no-store' } })
+  const credentials: BusinessCredentials = {
+    clientId: process.env.GOOGLE_BUSINESS_CLIENT_ID || '',
+    clientSecret: process.env.GOOGLE_BUSINESS_CLIENT_SECRET || '',
+    refreshToken: process.env.GOOGLE_BUSINESS_REFRESH_TOKEN || '',
+    location: process.env.GOOGLE_BUSINESS_LOCATION || '',
+  }
+  if (Object.values(credentials).some(value => !value)) return Response.json({ status: 'unconfigured', url: googleReviewsUrl }, { headers: { 'Cache-Control': 'no-store' } })
 
   try {
-    let placeId = process.env.GOOGLE_PLACE_ID
-    if (!placeId) {
-      const search = await fetch('https://places.googleapis.com/v1/places:searchText', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress' },
-        body: JSON.stringify({ textQuery: 'Fisioterapia Invasiva Chile, Coyancura 2283 oficina 302, Providencia, Santiago', languageCode: 'es' }),
-        cache: 'no-store',
-      })
-      if (!search.ok) throw new Error(`Google Places search: ${search.status}`)
-      const results = (await search.json()) as { places?: Place[] }
-      placeId = results.places?.find(place => /2283/.test(place.formattedAddress || '') && /fisio/i.test(place.displayName?.text || ''))?.id
-      if (!placeId) throw new Error('No se encontró la ficha de Coyancura 2283')
+    if (!cached || Date.now() >= cached.until) {
+      pending ||= businessReviews(credentials).then(value => { cached = { value, until: Date.now() + 60 * 60 * 1000 }; return value }).finally(() => { pending = undefined })
+      await pending
     }
-
-    const details = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?languageCode=es&regionCode=CL`, {
-      headers: { 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': 'displayName,rating,userRatingCount,reviews,googleMapsUri' },
-      cache: 'no-store',
-    })
-    if (!details.ok) throw new Error(`Google Places details: ${details.status}`)
-    const place = (await details.json()) as Place
-    return Response.json({
-      status: 'ok',
-      name: place.displayName?.text,
-      rating: place.rating,
-      count: place.userRatingCount,
-      url: place.googleMapsUri || reviewUrl,
-      reviews: (place.reviews || []).slice(0, 5).map(review => ({
-        author: review.authorAttribution?.displayName || 'Paciente',
-        authorUrl: review.authorAttribution?.uri,
-        photo: review.authorAttribution?.photoUri,
-        rating: review.rating,
-        text: review.text?.text,
-        date: review.publishTime,
-        relativeDate: review.relativePublishTimeDescription,
-        url: review.googleMapsUri || place.googleMapsUri || reviewUrl,
-      })),
-    }, { headers: { 'Cache-Control': 'no-store' } })
+    return Response.json(cached!.value, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
-    console.error('Reseñas de Google no disponibles:', error)
-    return Response.json({ status: 'unavailable', url: reviewUrl }, { status: 503, headers: { 'Cache-Control': 'no-store' } })
+    console.error('Reseñas de Google Business Profile no disponibles:', error)
+    return Response.json({ status: 'unavailable', url: googleReviewsUrl }, { status: 503, headers: { 'Cache-Control': 'no-store' } })
   }
 }

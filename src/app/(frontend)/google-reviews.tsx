@@ -5,14 +5,12 @@ import { useEffect, useRef, useState } from 'react'
 const reviewUrl = 'https://share.google/ay32o4HwwQOiA1uTV'
 
 type Review = {
+  id?: string
   author: string
-  authorUrl?: string
   photo?: string
   rating?: number
   text?: string
   date?: string
-  relativeDate?: string
-  url: string
 }
 
 type ReviewData = {
@@ -111,18 +109,17 @@ export default function GoogleReviews() {
     {reviews.length > 0 && <div className="google-review-carousel" onMouseEnter={() => { paused.current = true }} onMouseLeave={() => { paused.current = false }} onFocusCapture={() => { paused.current = true }} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) paused.current = false }}>
       {last > 0 && <div className="google-review-controls"><button type="button" aria-label="Reseñas anteriores" onClick={() => moveTo(active === 0 ? last : active - 1)}>‹</button><button type="button" aria-label="Reseñas siguientes" onClick={() => moveTo(active === last ? 0 : active + 1)}>›</button></div>}
       <div className="google-review-list" ref={track} onScroll={updateFromScroll} role="region" aria-label="Reseñas de Google" tabIndex={0}>
-        {reviews.map((review, index) => <article key={`${review.author}-${review.date || index}`}>
+        {reviews.map((review, index) => <article key={review.id || `${review.author}-${review.date || index}`}>
           <div className="google-review-source">
             {review.photo ? <img src={review.photo} alt="" width="40" height="40" loading="lazy" /> : <span className="google-review-avatar" aria-hidden="true">{review.author.charAt(0)}</span>}
-            <div><strong>{review.authorUrl ? <a href={review.authorUrl} target="_blank" rel="noopener noreferrer">{review.author}</a> : review.author}</strong>{review.relativeDate && <small>{review.relativeDate}</small>}</div>
+            <div><strong>{review.author}</strong>{review.date && <small>{new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric' }).format(new Date(review.date))}</small>}</div>
           </div>
           <div className="google-review-stars" aria-label={`${review.rating || 0} de 5 estrellas`}>{'★'.repeat(Math.max(0, Math.min(5, Math.round(review.rating || 0))))}</div>
           <p>{review.text || 'Calificación sin comentario.'}</p>
-          <a className="google-review-link" href={review.url} target="_blank" rel="noopener noreferrer">Ver reseña en Google</a>
         </article>)}
       </div>
-      {last > 0 && <div className="google-review-dots" aria-label="Páginas de reseñas">{Array.from({ length: last + 1 }, (_, index) => <button key={index} type="button" aria-label={`Ver reseñas desde la ${index + 1}`} aria-current={active === index ? 'true' : undefined} onClick={() => moveTo(index)} />)}</div>}
-      <p className="google-review-note">Google muestra hasta cinco reseñas ordenadas por relevancia; no aplicamos filtros.</p>
+      {last > 0 && last <= 10 && <div className="google-review-dots" aria-label="Páginas de reseñas">{Array.from({ length: last + 1 }, (_, index) => <button key={index} type="button" aria-label={`Ver reseñas desde la ${index + 1}`} aria-current={active === index ? 'true' : undefined} onClick={() => moveTo(index)} />)}</div>}
+      <p className="google-review-note">Reseñas de nuestro Perfil de Empresa en Google, ordenadas por actualización y sin filtros.</p>
     </div>}
   </section>
 }
