@@ -12,7 +12,9 @@ export const Content: CollectionConfig = {
     { name: 'publishedAt', type: 'date' }, { name: 'authorName', label: 'Autor', type: 'text' },
     { name: 'categories', label: 'Categorías (separadas por comas)', type: 'text' }, { name: 'tags', label: 'Etiquetas (separadas por comas)', type: 'text' },
     { name: 'featuredImage', type: 'relationship', relationTo: 'media' },
-    { name: 'html', label: 'Contenido HTML editable', type: 'textarea', admin: { rows: 24 } },
+    { name: 'body', label: 'Contenido visual', type: 'richText', admin: { description: 'Edita títulos, párrafos, enlaces, listas e imágenes. En entradas importadas, activa la opción siguiente para publicar esta versión.' } },
+    { name: 'useVisualEditor', label: 'Publicar contenido del editor visual', type: 'checkbox', defaultValue: false, admin: { description: 'Al activarlo, la web usa el contenido visual. Si queda desactivado, conserva el diseño HTML original de WordPress.' } },
+    { name: 'html', label: 'HTML original de WordPress', type: 'textarea', admin: { hidden: true } },
     { name: 'seoTitle', label: 'T?tulo SEO', type: 'text' }, { name: 'seoDescription', label: 'Descripci?n SEO', type: 'textarea' },
   ],
 }

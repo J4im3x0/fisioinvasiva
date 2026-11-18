@@ -2,6 +2,8 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { notFound } from 'next/navigation'
 import sanitizeHtml from 'sanitize-html'
+import { getPayloadPopulateFn } from '@payloadcms/richtext-lexical'
+import { convertLexicalToHTMLAsync } from '@payloadcms/richtext-lexical/html-async'
 import type { Metadata } from 'next'
 import ContactForm from '../contact-form'
 import GoogleReviews from '../google-reviews'
@@ -21,7 +23,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function Page({ params }: { params: Promise<{ slug: string[] }> }) {
   const page = await getPage((await params).slug)
   if (!page) notFound()
-  const html = sanitizeHtml(page.html || '', { allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'iframe', 'section', 'aside']), allowedAttributes: { ...sanitizeHtml.defaults.allowedAttributes, div: ['class'], section: ['class'], ul: ['class'], aside: ['class'], img: ['src', 'alt', 'width', 'height', 'loading'], iframe: ['src', 'title', 'allow', 'allowfullscreen', 'width', 'height', 'loading'] }, allowedIframeHostnames: ['www.youtube.com', 'www.youtube-nocookie.com'] })
+  const payload = await getPayload({ config })
+  const source = page.body && (page.useVisualEditor || !page.html)
+    ? await convertLexicalToHTMLAsync({ data: page.body, populate: await getPayloadPopulateFn({ payload, currentDepth: 0, depth: 1 }) })
+    : page.html || ''
+  const html = sanitizeHtml(source, { allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'iframe', 'section', 'aside', 'figure']), allowedAttributes: { ...sanitizeHtml.defaults.allowedAttributes, div: ['class'], section: ['class'], ul: ['class'], aside: ['class'], img: ['src', 'alt', 'width', 'height', 'loading'], iframe: ['src', 'title', 'allow', 'allowfullscreen', 'width', 'height', 'loading'] }, allowedIframeHostnames: ['www.youtube.com', 'www.youtube-nocookie.com'] })
   if (page.kind === 'post') {
     const categories = taxonomyValues(page.categories), tags = taxonomyValues(page.tags)
     return <main className="treatment-article"><header className="directory-heading"><h1>{page.title}</h1><nav aria-label="Ruta de navegación"><a href="/">Inicio</a><span>›</span><a href="/tratamientos/">Tratamientos</a>{categories[0] && <><span>›</span><a href={`/tratamientos/${taxonomySlug(categories[0])}/`}>{categories[0]}</a></>}<span>›</span><span>{page.title}</span></nav></header><div className="treatment-article-inner"><div className="treatment-article-meta">{page.authorName && <span>Publicado por {page.authorName}</span>}{page.publishedAt && <time dateTime={page.publishedAt}>{new Date(page.publishedAt).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}</time>}</div><div className="treatment-taxonomy">{categories.length > 0 && <div><strong>Categorías</strong>{categories.map(category => <a key={category} href={`/tratamientos/${taxonomySlug(category)}/`}>{category}</a>)}</div>}{tags.length > 0 && <div><strong>Tags</strong>{tags.map(tag => <a key={tag} href={`/tag/${taxonomySlug(tag)}/`}>{tag}</a>)}</div>}</div><div className="article-content treatment-content" dangerouslySetInnerHTML={{ __html: html }} /><div className="treatment-article-cta"><h2>¿Necesitas orientación para tu tratamiento?</h2><a className="button button-blue" href="/agenda">Agendar hora</a></div></div></main>

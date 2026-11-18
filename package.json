@@ -11,6 +11,7 @@
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap",
     "import:wordpress": "tsx scripts/import-wordpress.ts",
+    "backfill:visual": "tsx scripts/backfill-visual-editor.ts",
     "google:locations": "tsx scripts/google-business-locations.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -22,6 +23,7 @@
     "dotenv": "^16.4.7",
     "fast-xml-parser": "^5.3.0",
     "graphql": "^16.8.1",
+    "jsdom": "^29.1.1",
     "next": "^16.4.6",
     "nodemailer": "^10.6.0",
     "payload": "^3.91.0",
@@ -32,6 +34,7 @@
     "swiper": "^14.4.0"
   },
   "devDependencies": {
+    "@types/jsdom": "^30.0.0",
     "@types/node": "^22.0.0",
     "@types/nodemailer": "^7.0.0",
     "@types/react": "^19.0.0",

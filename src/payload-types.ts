@@ -182,6 +182,28 @@ export interface Content {
   categories?: string | null;
   tags?: string | null;
   featuredImage?: (number | null) | Media;
+  /**
+   * Edita títulos, párrafos, enlaces, listas e imágenes. En entradas importadas, activa la opción siguiente para publicar esta versión.
+   */
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Al activarlo, la web usa el contenido visual. Si queda desactivado, conserva el diseño HTML original de WordPress.
+   */
+  useVisualEditor?: boolean | null;
   html?: string | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
@@ -324,6 +346,8 @@ export interface ContentSelect<T extends boolean = true> {
   categories?: T;
   tags?: T;
   featuredImage?: T;
+  body?: T;
+  useVisualEditor?: T;
   html?: T;
   seoTitle?: T;
   seoDescription?: T;

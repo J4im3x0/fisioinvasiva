@@ -3,7 +3,9 @@ import { XMLParser } from 'fast-xml-parser'
 import { readFile, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { getPayload } from 'payload'
+import { editorConfigFactory } from '@payloadcms/richtext-lexical'
 import config from '../src/payload.config'
+import { importedHtmlToLexical } from '../src/lib/imported-html-to-lexical'
 import { renderElementorPost } from './elementor-post'
 
 type Item = Record<string, any>
@@ -25,8 +27,10 @@ if (process.argv.includes('--inventory')) {
   process.exit(0)
 }
 const payload = await getPayload({ config })
+const editorConfig = await editorConfigFactory.default({ config: payload.config })
 const report: string[] = ['# Informe de importación', '', `Exportación: ${path.basename(filename)}`, '']
 const mediaMap = new Map<string, string>()
+const mediaIdsByUrl = new Map<string, number | string>()
 const mediaAlt = new Map<string, string>()
 const mediaIds = new Map<string, number | string>()
 const localFileExists = async (name?: string | null) => {
@@ -59,7 +63,7 @@ for (const item of attachments) {
     } else { doc = await payload.update({ collection: 'media', id: doc.id, data: { alt: meta(item)._wp_attachment_image_alt || '', originalUrl: url } }) }
     if (!await localFileExists(doc.filename)) throw new Error('El archivo no quedó guardado en el volumen media')
     if (needsFile) downloaded++
-    mediaMap.set(url, localUrl(doc.url)); mediaAlt.set(url, meta(item)._wp_attachment_image_alt || ''); mediaIds.set(id, doc.id)
+    mediaMap.set(url, localUrl(doc.url)); mediaIdsByUrl.set(localUrl(doc.url), doc.id); mediaAlt.set(url, meta(item)._wp_attachment_image_alt || ''); mediaIds.set(id, doc.id)
   } catch (error) { failed++; report.push(`- Medio ${id} (${url}): ${String(error)}`) }
 }
 // Las variantes de Elementor pueden no existir como adjuntos independientes.
@@ -82,7 +86,7 @@ for (const url of embedded) {
     }
     if (!await localFileExists(doc.filename)) throw new Error('El archivo no quedó guardado en el volumen media')
     if (needsFile) downloaded++
-    mediaMap.set(url, localUrl(doc.url))
+    mediaMap.set(url, localUrl(doc.url)); mediaIdsByUrl.set(localUrl(doc.url), doc.id)
   } catch (error) { failed++; report.push(`- Imagen ${url}: ${String(error)}`) }
 }
 for (const item of content) {
@@ -112,11 +116,14 @@ for (const item of content) {
   if (missing.length) { failed++; report.push(`- ${route}: ${missing.length} referencias a imágenes originales no copiadas; contenido no actualizado.`); continue }
   const categories = array<Item>(item.category)
   const status = value(item['wp:status']); const visibility = ['publish', 'draft', 'private', 'pending', 'future'].includes(status) ? status as 'publish' | 'draft' | 'private' | 'pending' | 'future' : 'draft'
-  const data = { title: value(item.title) || `Sin título ${id}`, path: route, wordpressId: id, kind: value(item['wp:post_type']) as 'post' | 'page', visibility, publishedAt: value(item['wp:post_date_gmt']) && value(item['wp:post_date_gmt']) !== '0000-00-00 00:00:00' ? value(item['wp:post_date_gmt']).replace(' ', 'T') + 'Z' : undefined, authorName: value(item['dc:creator']), categories: categories.filter(c => c['@_domain'] === 'category').map(value).join(', '), tags: categories.filter(c => c['@_domain'] === 'post_tag').map(value).join(', '), html, featuredImage: mediaIds.get(metadata._thumbnail_id) as number | undefined, seoTitle: metadata.rank_math_title || '', seoDescription: metadata.rank_math_description || '' }
   const found = await payload.find({ collection: 'content', where: { wordpressId: { equals: id } }, limit: 1 })
+  const visual = found.docs[0]?.useVisualEditor ? null : importedHtmlToLexical(html, mediaIdsByUrl, editorConfig)
+  if (visual?.missingImages.length) report.push(`- ${route}: ${visual.missingImages.length} imágenes requieren revisión en el editor visual.`)
+  if (visual?.unsupportedEmbeds.length) report.push(`- ${route}: ${visual.unsupportedEmbeds.length} videos incrustados se muestran como enlaces en el editor visual; el HTML original conserva la incrustación.`)
+  const data = { title: value(item.title) || `Sin título ${id}`, path: route, wordpressId: id, kind: value(item['wp:post_type']) as 'post' | 'page', visibility, publishedAt: value(item['wp:post_date_gmt']) && value(item['wp:post_date_gmt']) !== '0000-00-00 00:00:00' ? value(item['wp:post_date_gmt']).replace(' ', 'T') + 'Z' : undefined, authorName: value(item['dc:creator']), categories: categories.filter(c => c['@_domain'] === 'category').map(value).join(', '), tags: categories.filter(c => c['@_domain'] === 'post_tag').map(value).join(', '), html, ...(visual ? { body: visual.body } : {}), featuredImage: mediaIds.get(metadata._thumbnail_id) as number | undefined, seoTitle: metadata.rank_math_title || '', seoDescription: metadata.rank_math_description || '' }
   if (found.docs[0]) await payload.update({ collection: 'content', id: found.docs[0].id, data }); else await payload.create({ collection: 'content', data })
 }
-report.push('', `Registros de contenido procesados: ${content.length}`, `Adjuntos asociados importados: ${mediaIds.size}`, `Medios con archivo local verificado: ${mediaMap.size}`, `Archivos descargados o reparados en el volumen: ${downloaded}`, `Errores de medios o contenido: ${failed}`, '', 'Revisar los medios no públicos, el formulario, los títulos SEO con variables de Rank Math y los elementos que no aparezcan en content:encoded. La sincronización sobrescribe los campos importados en Payload.')
+report.push('', `Registros de contenido procesados: ${content.length}`, `Adjuntos asociados importados: ${mediaIds.size}`, `Medios con archivo local verificado: ${mediaMap.size}`, `Archivos descargados o reparados en el volumen: ${downloaded}`, `Errores de medios o contenido: ${failed}`, '', 'Revisar los medios no públicos, el formulario, los títulos SEO con variables de Rank Math y los elementos que no aparezcan en content:encoded. La sincronización conserva el contenido visual de entradas que ya lo publicaron, pero sobrescribe sus demás campos importados.')
 await writeFile('informe-importacion.md', report.join('\n') + '\n')
 console.log(report.join('\n'))
 process.exit(failed ? 1 : 0)
