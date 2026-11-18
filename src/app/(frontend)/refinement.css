@@ -1,0 +1,266 @@
+:root {
+  --blue: #24477f;
+  --mid: #4e80b2;
+  --green: #73bd40;
+  --pale: #eff5fa;
+  --orange: #f5a623;
+  --content: 1240px;
+  --gutter: clamp(20px, 4vw, 48px);
+}
+
+body { color: var(--blue); }
+a { text-underline-offset: .22em; }
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
+.button { min-height: 48px; padding: 12px 24px; transition: background-color .18s ease, color .18s ease; }
+.button-blue { background: #346fa9; }
+.button-orange { min-width: 0; min-height: 58px; padding-inline: 36px; color: #183d78; }
+
+.header { border-bottom: 1px solid #e7edf4; box-shadow: 0 8px 24px #1a44720a; }
+.header-inner { max-width: 1380px; min-height: 94px; padding-inline: var(--gutter); gap: clamp(16px, 2vw, 32px); }
+.brand { flex-basis: 164px; }
+.brand img { height: 78px; }
+.header .mobile-menu { display: none; }
+.desktop-nav { max-width: none; min-height: 52px; margin: 0; padding-inline: 10px; gap: 4px; }
+.desktop-nav a { font-size: 14px; }
+.desktop-nav a[aria-current=page] { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 7px; }
+.header-phone { margin: 0; font-size: 13px; }
+.header-cta { display: inline-flex !important; flex: none; white-space: nowrap; }
+.nav-treatment-menu { z-index: 25; }
+.mobile-menu-button { width: 44px; height: 44px; padding: 9px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border: 0; background: transparent; color: #376fa8; cursor: pointer; }
+.mobile-menu-button span { width: 24px; height: 2px; background: currentColor; }
+.mobile-menu nav[hidden] { display: none; }
+.mobile-menu nav a[aria-current=page] { background: #eff5fb; border-radius: 6px; text-decoration: underline; }
+
+.hero, .treatments, .research, .visit, .pricing {
+  width: min(calc(100% - 40px), 1480px);
+  margin-inline: auto;
+}
+.hero { min-height: 620px; margin-top: 20px; grid-template-columns: 1fr 1fr; }
+.hero-copy { max-width: 720px; padding: 48px 0 48px clamp(36px, 5vw, 82px); top: 0; }
+.hero h1 { margin-bottom: 20px; font-size: clamp(44px, 4.5vw, 68px); letter-spacing: -.035em; }
+.hero-copy p { max-width: 38ch; margin: 0 0 30px; font-size: clamp(16px, 1.3vw, 19px); line-height: 1.55; }
+.hero-image { height: 580px; }
+.about { max-width: var(--content); padding: 84px var(--gutter) 96px; gap: 7%; }
+.about-portrait { width: min(100%, 320px); }
+.quote-icon { margin-bottom: 20px; }
+.about h2 { max-width: 38ch; margin-bottom: 28px; font-size: clamp(22px, 2vw, 29px); line-height: 1.38; letter-spacing: -.025em; }
+.signature { margin-bottom: 26px; }
+
+.treatments { margin-bottom: 28px; padding: 72px var(--gutter) 56px; }
+.treatments + .treatments { padding-bottom: 56px; }
+.section-intro { max-width: 760px; margin-bottom: 42px; }
+.section-intro h2, .pricing h2, .testimonials h2 { font-size: clamp(32px, 3.3vw, 48px); letter-spacing: -.03em; }
+.section-intro p { max-width: 70ch; margin-inline: auto; font-size: 16px; line-height: 1.65; }
+.treatment-carousel { max-width: var(--content); }
+.treatment-arrow-prev { left: -42px; }
+.treatment-arrow-next { right: -42px; }
+.treatment-arrow { width: 42px; height: 42px; border-radius: 50%; background: #fff; color: #2f6ca7; font-size: 32px; line-height: 1; box-shadow: 0 4px 14px #193d6d24; }
+.treatment-dots { gap: 3px; }
+.treatment-dots button, .treatment-dots button[aria-current=true] { width: 24px; height: 24px; display: grid; place-items: center; background: transparent; }
+.treatment-dots button::before { content: ''; width: 7px; height: 7px; border-radius: 7px; background: #8fa7ba; }
+.treatment-dots button[aria-current=true]::before { width: 18px; background: #24477f; }
+.treatment-card { border-radius: 16px; }
+.treatment-card > img { aspect-ratio: 1.55; }
+.treatment-card-copy { padding: 22px 20px 25px; }
+.treatment-card h3 { min-height: 2.4em; margin-bottom: 12px; font-size: clamp(19px, 1.7vw, 23px); }
+.treatment-card p { margin-bottom: 18px; font-size: 14px; line-height: 1.5; }
+.treatment-more, .treatments + .treatments .treatment-more { max-width: var(--content); display: flex; justify-content: space-between; gap: 22px; margin-top: 25px; }
+.treatment-more h3, .treatments + .treatments .treatment-more h3 { order: 0; padding: 0; background: none; font-size: clamp(22px, 2.3vw, 30px); }
+.treatment-more .section-link, .treatments + .treatments .treatment-more .section-link { order: 0; flex: none; }
+.treatment-more h3 span { color: #4e9d35; }
+
+.research { min-height: 420px; margin-bottom: 28px; padding: 80px var(--gutter); background-image: linear-gradient(90deg, #153865e8, #153865a6), url('/brand/investigacion.webp'); }
+.research-inner { width: min(var(--content), 100%); grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 9%; align-items: center; }
+.research-heading, .research-body { padding: 0; }
+.research h2 { max-width: 9ch; font-size: clamp(38px, 4vw, 55px); }
+.research-body p { max-width: 68ch; font-size: 16px; line-height: 1.7; }
+
+.visit { padding: 64px var(--gutter) 22px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.visit img { width: 100%; height: 430px; margin: 0; object-position: center; border-radius: 16px; }
+.visit > div { min-height: 430px; margin: 0; padding: 38px; border-radius: 16px; }
+.visit h2 { max-width: 16ch; font-size: clamp(30px, 3vw, 42px); }
+.location-icon { width: 74px; height: 74px; margin-bottom: 20px; }
+.location-icon svg { width: 34px; height: 34px; }
+.pricing { padding: 48px var(--gutter) 76px; }
+.pricing .section-intro { margin-bottom: 36px; }
+.price-grid { max-width: var(--content); gap: 18px; }
+.price-grid article { min-height: 0; margin: 0; padding: 32px 24px; border-radius: 16px; }
+.price-grid article > p:first-of-type { margin-bottom: 14px; color: inherit; }
+.price-grid h3 { min-height: 2.4em; font-size: 24px; }
+.price-grid strong { font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.price-grid ul { margin: 20px 0 24px; }
+.price-grid li { padding: 8px 0; }
+.price-grid .button { margin-top: auto; }
+
+.testimonials { max-width: var(--content); margin: 86px auto 56px; padding: 0 var(--gutter); grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 5%; }
+.testimonials > div:first-child { max-width: 490px; padding: 0; }
+.testimonials h2 { font-size: clamp(36px, 3.7vw, 54px); }
+.testimonials p { max-width: 48ch; font-size: 17px; line-height: 1.6; }
+.testimonials .button { display: inline-flex; width: auto; margin: 14px 0 0; }
+.reviews { min-height: 400px; }
+.reviews img { width: min(560px, 100%); }
+.rating { top: 215px; right: 0; }
+.google-reviews { max-width: var(--content); width: min(calc(100% - 40px), var(--content)); padding: 38px; }
+.google-reviews-empty { margin: 20px 0 0; color: #375f89; }
+
+footer { max-width: none; min-height: 0; margin: 80px 0 0; padding: 56px max(var(--gutter), calc((100vw - var(--content)) / 2)) 24px; grid-template-columns: 1fr 220px; gap: 48px; background: #173b70; color: #fff; }
+footer img, .footer-brand { display: block; }
+.footer-brand img { width: 170px; height: 76px; object-fit: contain; object-position: left center; padding: 6px; border-radius: 10px; background: #fff; }
+.footer-contact p:first-child { margin: 24px 0 8px; font-size: 16px; }
+.footer-contact p:nth-child(2), .footer-contact p:nth-child(3) { margin: 0 0 8px; }
+.footer-social { margin-top: 20px; }
+.footer-social a { color: #173b70; }
+.footer-links { gap: 9px; }
+.footer-links strong { margin-bottom: 8px; }
+.copyright { margin: 0; padding-top: 20px; border-color: #ffffff36; color: #dbe9f7; }
+
+.inner-page { width: min(calc(100% - 40px), 1480px); margin: 20px auto 0; }
+.inner-hero { max-width: none; padding: 64px var(--gutter); }
+.inner-hero h1 { margin-bottom: 38px; font-size: clamp(38px, 4.4vw, 60px); letter-spacing: -.03em; }
+.about-intro { max-width: var(--content); margin: auto; gap: 6%; }
+.about-intro h2 { max-width: 38ch; font-weight: 600; line-height: 1.4; }
+.about-values { max-width: var(--content); margin: 36px auto 0; gap: 14px; }
+.about-values article { min-height: 204px; padding: 24px 16px; border-radius: 16px; }
+.about-values h3 { font-weight: 700; }
+.about-values p { font-size: 14px; }
+.about-team { max-width: var(--content); margin: 72px auto; }
+.team-member { gap: 7%; margin-bottom: 60px; }
+.team-member > img { max-height: 650px; border-radius: 16px; }
+.team-member > div { text-align: left; }
+.team-member p { max-width: 68ch; margin-inline: 0; line-height: 1.65; }
+.inner-cta { max-width: var(--content); background: #346fa9; }
+.contact-hero { background-image: linear-gradient(125deg, #f8fbfd, #e7f2fb); }
+.contact-details h2 { line-height: 1.3; }
+.contact-page .contact-form { padding: 38px; border-radius: 16px; }
+.contact-page .contact-form input:not([type=checkbox]), .contact-page .contact-form textarea { min-height: 48px; border-radius: 8px; }
+.contact-page .contact-form textarea { min-height: 128px; }
+.testimonials-intro { max-width: var(--content); margin: auto; }
+.testimonials-intro > img { max-height: 550px; border-radius: 16px; }
+.testimonial-media { margin-top: 28px; }
+.directory-heading { max-width: var(--content); margin: 56px auto 52px; }
+.directory-heading h1 { font-weight: 700; }
+.directory-inner, .treatment-article-inner { max-width: var(--content); }
+.treatment-filters a { border-radius: 8px; }
+.treatment-index-grid { gap: 36px 22px; }
+.treatment-index-card { border-radius: 16px; overflow: hidden; background: #f7fafc; }
+.treatment-index-copy { padding: 22px; }
+.treatment-index-card h2 { font-size: 24px; }
+.article { max-width: 940px; padding: 64px var(--gutter) 100px; }
+.article-content { max-width: 70ch; line-height: 1.7; }
+.article-content p { margin: 0 0 1.4em; }
+
+@media (max-width: 1250px) {
+  .header-phone { display: none; }
+}
+@media (max-width: 1050px) {
+  .header-inner { min-height: 82px; }
+  .header .mobile-menu { display: block; }
+  .desktop-nav { display: none; }
+  .mobile-menu nav { max-height: calc(100dvh - 100px); overflow-y: auto; }
+  .brand { margin-right: auto; }
+  .header-cta { display: inline-flex !important; }
+  .treatment-arrow-prev { left: -25px; }
+  .treatment-arrow-next { right: -25px; }
+}
+@media (max-width: 760px) {
+  :root { --gutter: 20px; }
+  .header-inner { min-height: 72px; padding-inline: 16px; gap: 8px; }
+  .brand { flex: 0 0 126px; }
+  .brand img { height: 62px; }
+  .header-phone { display: inline-flex; margin-left: auto; font-size: 0; }
+  .header-phone svg { width: 24px; height: 24px; }
+  .header-cta { display: none !important; }
+  .mobile-menu nav { left: -12px; top: 50px; width: min(320px, calc(100vw - 32px)); }
+  .hero, .treatments, .research, .visit, .pricing, .inner-page, .google-reviews { width: calc(100% - 32px); margin-inline: auto; }
+  .hero { min-height: 0; margin-top: 16px; padding-bottom: 20px; }
+  .hero-copy { padding: 44px 22px 0; }
+  .hero h1 { max-width: 13ch; margin-bottom: 14px; font-size: clamp(36px, 10vw, 48px); }
+  .hero-copy p { max-width: 32ch; margin: 0 auto 24px; font-size: 15px; }
+  .button-orange { min-height: 52px; }
+  .hero-image { width: 100%; height: min(76vw, 330px); margin: 12px 0 0; padding: 0 20px; }
+  .about { align-items: center; gap: 20px; padding: 56px 20px 72px; }
+  .about-portrait { width: 210px; }
+  .about-copy { width: min(100%, 480px); }
+  .quote-icon { width: 48px; margin-bottom: 14px; }
+  .about h2 { margin-bottom: 20px; font-size: 21px; line-height: 1.4; }
+  .signature { margin: 0 0 24px; font-size: 14px; }
+  .signature:before { display: none; }
+  .about-copy .button { margin: 0; }
+  .treatments { margin-bottom: 20px; padding: 48px 20px 44px; }
+  .treatments + .treatments { padding-bottom: 44px; }
+  .treatments .section-intro, .treatments + .treatments .section-intro { width: auto; margin: 0 auto 30px; }
+  .treatments + .treatments .section-intro h2 { top: 0; }
+  .section-intro h2, .pricing h2, .testimonials h2 { font-size: clamp(29px, 8vw, 38px); }
+  .treatments .section-intro p { font-size: 15px; line-height: 1.55; }
+  .treatment-carousel { padding-bottom: 35px; }
+  .treatment-arrow { top: 45%; }
+  .treatment-arrow-prev { left: -22px; }
+  .treatment-arrow-next { right: -22px; }
+  .treatment-card > img { aspect-ratio: 1.45; }
+  .treatment-card h3 { min-height: 0; font-size: 21px; }
+  .treatment-card p { font-size: 14px; }
+  .treatment-more, .treatments + .treatments .treatment-more, .treatments:has(+ .treatments) .treatment-more { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; margin-top: 20px; }
+  .treatment-more h3, .treatments + .treatments .treatment-more h3, .treatments:has(+ .treatments) .treatment-more h3 { order: 0; width: auto; padding: 0; font-size: 22px; border-radius: 0; }
+  .treatment-more .section-link, .treatments + .treatments .treatment-more .section-link { order: 0; width: auto; margin: 0; }
+  .research { min-height: 0; margin-bottom: 20px; padding: 56px 28px; }
+  .research-inner { display: grid; grid-template-columns: 1fr; gap: 28px; }
+  .research h2 { font-size: 38px; }
+  .research .button { width: auto; min-height: 48px; padding: 12px 24px; }
+  .research .research-body p { margin: 0; font-size: 15px; line-height: 1.65; }
+  .visit { grid-template-columns: minmax(0, 1fr); padding: 20px 20px 0; gap: 14px; }
+  .visit img { height: 250px; }
+  .visit > div { min-height: 0; padding: 30px 20px; }
+  .visit h2 { font-size: 29px; }
+  .location-icon { width: 60px; height: 60px; }
+  .pricing { padding: 48px 20px 54px; }
+  .pricing .section-intro { max-width: 65ch; margin-bottom: 28px; }
+  .price-grid { gap: 14px; }
+  .price-grid article { padding: 30px 22px; }
+  .price-grid h3 { min-height: 0; max-width: none; font-size: 24px; }
+  .price-grid strong { font-size: 34px; }
+  .testimonials { grid-template-columns: minmax(0, 1fr); margin: 64px auto 40px; padding: 0 20px; gap: 24px; }
+  .testimonials > div:first-child { padding: 0; }
+  .testimonials p { font-size: 15px; line-height: 1.6; }
+  .testimonials .button { margin: 0; }
+  .reviews { min-height: 0; }
+  .reviews img { width: 100%; height: auto; max-height: 250px; margin: 0; object-fit: contain; }
+  .rating { position: relative; top: auto; right: auto; width: min(320px, 95%); margin: -28px auto 0; }
+  .google-reviews { margin-bottom: 44px; padding: 28px 20px; }
+  footer { grid-template-columns: minmax(0, 1fr); margin-top: 56px; padding: 48px 24px 110px; gap: 30px; text-align: left; }
+  .footer-brand img { margin: 0 auto 24px; }
+  .footer-contact { text-align: center; }
+  .footer-contact p:first-child { margin: 0 0 8px; }
+  .footer-contact p:nth-child(2), .footer-contact p:nth-child(3) { margin: 0 0 8px; }
+  .footer-social { margin-top: 18px; }
+  .footer-links { align-items: center; }
+  .copyright { font-size: 12px; line-height: 1.5; }
+  .mobile-cta { bottom: max(12px, env(safe-area-inset-bottom)); }
+  .inner-hero { padding: 42px 20px; }
+  .inner-hero h1 { margin-bottom: 28px; font-size: 37px; }
+  .about-intro > img { height: 280px; }
+  .about-intro h2 { font-size: 22px; }
+  .about-values { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .about-values article { min-height: 0; padding: 22px 12px; }
+  .about-values img { width: 42px; height: 42px; }
+  .about-values h3 { font-size: 17px; }
+  .about-values p { font-size: 13px; }
+  .about-team { margin: 56px 0; }
+  .team-member { gap: 18px; margin-bottom: 60px; }
+  .team-member p { margin: 0 0 20px; text-align: left; }
+  .contact-hero { padding: 42px 20px; }
+  .contact-details h2 { font-size: 22px; }
+  .contact-page .contact-form { padding: 26px 20px; }
+  .testimonials-intro > img { height: auto; }
+  .testimonial-media { padding: 42px 20px; }
+  .directory-heading { margin: 42px auto 32px; }
+  .directory-inner, .treatment-article-inner { padding: 0 20px; }
+  .treatment-index-grid { gap: 22px; }
+  .article { padding: 48px 20px 80px; }
+}
+@media (max-width: 360px) {
+  .about-values { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .button { transition: none; }
+}

@@ -106,6 +106,7 @@ export default function GoogleReviews() {
       {data?.status === 'ok' && data.rating != null && <p>{data.rating.toLocaleString('es-CL', { maximumFractionDigits: 1 })} de 5 · {data.count?.toLocaleString('es-CL')} reseñas</p>}
       <a className="button button-blue" href={data?.url || reviewUrl} target="_blank" rel="noopener noreferrer">Ver todas en Google</a>
     </div>
+    {data && !reviews.length && <p className="google-reviews-empty">Las reseñas están disponibles en nuestro perfil de Google.</p>}
     {reviews.length > 0 && <div className="google-review-carousel" onMouseEnter={() => { paused.current = true }} onMouseLeave={() => { paused.current = false }} onFocusCapture={() => { paused.current = true }} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) paused.current = false }}>
       {last > 0 && <div className="google-review-controls"><button type="button" aria-label="Reseñas anteriores" onClick={() => moveTo(active === 0 ? last : active - 1)}>‹</button><button type="button" aria-label="Reseñas siguientes" onClick={() => moveTo(active === last ? 0 : active + 1)}>›</button></div>}
       <div className="google-review-list" ref={track} onScroll={updateFromScroll} role="region" aria-label="Reseñas de Google" tabIndex={0}>
