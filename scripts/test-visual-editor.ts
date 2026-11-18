@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import assert from 'node:assert/strict'
-import type { TypeWithID } from 'payload'
+import { isValidID, type TypeWithID } from 'payload'
 import config from '../src/payload.config'
 import { editorConfigFactory } from '@payloadcms/richtext-lexical'
 import { convertLexicalToHTMLAsync } from '@payloadcms/richtext-lexical/html-async'
@@ -13,7 +13,9 @@ const nodes = JSON.stringify(result.body)
 assert.match(nodes, /"type":"heading"/)
 assert.match(nodes, /"type":"list"/)
 assert.match(nodes, /"type":"upload"/)
-assert.match(nodes, /"value":"42"/)
+assert.match(nodes, /"value":42/)
+assert.equal(isValidID(42, 'number'), true)
+assert.equal(isValidID('42', 'number'), false)
 assert.match(nodes, /"type":"link"/)
 assert.deepEqual(result.missingImages, [])
 assert.deepEqual(result.unsupportedEmbeds, ['https://www.youtube.com/embed/abc'])

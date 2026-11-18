@@ -26,8 +26,20 @@ export function importedHtmlToLexical(html: string, mediaIdsByUrl: Map<string, n
     link.textContent = frame.getAttribute('title') || 'Ver video incrustado'
     frame.replaceWith(link)
   }
+  const body = convertHTMLToLexical({ editorConfig, html: dom.window.document.body.innerHTML, JSDOM })
+  // Payload's HTML converter reads upload IDs as strings; PostgreSQL media IDs must stay numeric.
+  const ids = new Map(Array.from(mediaIdsByUrl.values(), id => [String(id), id]))
+  type Node = { type?: string; value?: unknown; children?: Node[] }
+  const restoreUploadId = (node: Node) => {
+    if (node.type === 'upload') {
+      const id = ids.get(String(node.value))
+      if (id !== undefined) node.value = id
+    }
+    for (const child of node.children || []) restoreUploadId(child)
+  }
+  restoreUploadId(body.root)
   return {
-    body: convertHTMLToLexical({ editorConfig, html: dom.window.document.body.innerHTML, JSDOM }),
+    body,
     missingImages,
     unsupportedEmbeds,
   }
