@@ -1,5 +1,6 @@
 import * as migration_20261116_182632_initial from './20261116_182632_initial';
 import * as migration_20261118_214049_visual_editor from './20261118_214049_visual_editor';
+import * as migration_20261118_225425_visual_sections from './20261118_225425_visual_sections';
 
 export const migrations = [
   {
@@ -10,6 +11,11 @@ export const migrations = [
   {
     up: migration_20261118_214049_visual_editor.up,
     down: migration_20261118_214049_visual_editor.down,
-    name: '20261118_214049_visual_editor'
+    name: '20261118_214049_visual_editor',
+  },
+  {
+    up: migration_20261118_225425_visual_sections.up,
+    down: migration_20261118_225425_visual_sections.down,
+    name: '20261118_225425_visual_sections'
   },
 ];

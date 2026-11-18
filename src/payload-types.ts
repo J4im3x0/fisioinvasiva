@@ -183,7 +183,65 @@ export interface Content {
   tags?: string | null;
   featuredImage?: (number | null) | Media;
   /**
-   * Edita títulos, párrafos, enlaces, listas e imágenes. En entradas importadas, activa la opción siguiente para publicar esta versión.
+   * Cada fila corresponde a una sección de la página. Las columnas se muestran en el mismo orden que en la web.
+   */
+  sections?:
+    | {
+        left?: {
+          body?: {
+            root: {
+              type: string;
+              children: {
+                type: any;
+                version: number;
+                [k: string]: unknown;
+              }[];
+              direction: ('ltr' | 'rtl') | null;
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+              indent: number;
+              version: number;
+            };
+            [k: string]: unknown;
+          } | null;
+          videoUrl?: string | null;
+          videoPortrait?: boolean | null;
+          gallery?:
+            | {
+                image?: (number | null) | Media;
+                id?: string | null;
+              }[]
+            | null;
+        };
+        right?: {
+          body?: {
+            root: {
+              type: string;
+              children: {
+                type: any;
+                version: number;
+                [k: string]: unknown;
+              }[];
+              direction: ('ltr' | 'rtl') | null;
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+              indent: number;
+              version: number;
+            };
+            [k: string]: unknown;
+          } | null;
+          videoUrl?: string | null;
+          videoPortrait?: boolean | null;
+          gallery?:
+            | {
+                image?: (number | null) | Media;
+                id?: string | null;
+              }[]
+            | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Para artículos sin secciones de dos columnas.
    */
   body?: {
     root: {
@@ -201,7 +259,7 @@ export interface Content {
     [k: string]: unknown;
   } | null;
   /**
-   * Al activarlo, la web usa el contenido visual. Si queda desactivado, conserva el diseño HTML original de WordPress.
+   * Guarda primero y usa Vista previa para revisar las secciones. Activa esta opción cuando quieras reemplazar la versión original de WordPress.
    */
   useVisualEditor?: boolean | null;
   html?: string | null;
@@ -346,6 +404,37 @@ export interface ContentSelect<T extends boolean = true> {
   categories?: T;
   tags?: T;
   featuredImage?: T;
+  sections?:
+    | T
+    | {
+        left?:
+          | T
+          | {
+              body?: T;
+              videoUrl?: T;
+              videoPortrait?: T;
+              gallery?:
+                | T
+                | {
+                    image?: T;
+                    id?: T;
+                  };
+            };
+        right?:
+          | T
+          | {
+              body?: T;
+              videoUrl?: T;
+              videoPortrait?: T;
+              gallery?:
+                | T
+                | {
+                    image?: T;
+                    id?: T;
+                  };
+            };
+        id?: T;
+      };
   body?: T;
   useVisualEditor?: T;
   html?: T;

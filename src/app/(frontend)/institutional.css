@@ -87,6 +87,7 @@
 .treatment-index-more { display:inline-block; color:#376fa8; font-size:14px; font-weight:700; text-decoration:none; }
 .treatment-index-more:hover { text-decoration:underline; }
 .treatment-article .directory-heading { margin-bottom:74px; }
+.editor-preview-notice { max-width:1320px; margin:20px auto; padding:14px 24px; border-left:4px solid #568bbf; background:#eff5fb; color:#143d6b; font-size:15px; line-height:1.5; }
 .treatment-article-meta { display:flex; gap:18px; color:#7392bd; font-size:14px; }
 .treatment-taxonomy { display:flex; flex-wrap:wrap; gap:16px 36px; margin:12px 0 45px; }
 .treatment-taxonomy>div { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
@@ -106,6 +107,9 @@
 .treatment-content .wp-check-list { margin:0 0 24px; padding:0; list-style:none; }
 .treatment-content .wp-check-list li { position:relative; padding:0 0 17px 37px; line-height:1.45; }
 .treatment-content .wp-check-list li:before { content:'✓'; position:absolute; left:0; color:#2b6cf5; font-weight:800; }
+.treatment-content--editable ul { margin:0 0 24px; padding:0; list-style:none; }
+.treatment-content--editable ul li { position:relative; padding:0 0 17px 37px; line-height:1.45; }
+.treatment-content--editable ul li:before { content:'✓'; position:absolute; left:0; color:#2b6cf5; font-weight:800; }
 .treatment-content .wp-slides { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:18px; }
 .treatment-content .wp-slides img { width:100%; height:100%; object-fit:contain; background:#f6f9fc; }
 .treatment-content blockquote,.treatment-content .wp-note { margin:0 0 25px; padding:24px; background:#eff5fb; border-left:4px solid #568bbf; }

@@ -6,6 +6,7 @@ import { getPayload } from 'payload'
 import { editorConfigFactory } from '@payloadcms/richtext-lexical'
 import config from '../src/payload.config'
 import { importedHtmlToLexical } from '../src/lib/imported-html-to-lexical'
+import { importedHtmlToSections } from '../src/lib/imported-html-to-sections'
 import { renderElementorPost } from './elementor-post'
 
 type Item = Record<string, any>
@@ -30,7 +31,7 @@ const payload = await getPayload({ config })
 const editorConfig = await editorConfigFactory.default({ config: payload.config })
 const report: string[] = ['# Informe de importación', '', `Exportación: ${path.basename(filename)}`, '']
 const mediaMap = new Map<string, string>()
-const mediaIdsByUrl = new Map<string, number | string>()
+const mediaIdsByUrl = new Map<string, number>()
 const mediaAlt = new Map<string, string>()
 const mediaIds = new Map<string, number | string>()
 const localFileExists = async (name?: string | null) => {
@@ -117,10 +118,14 @@ for (const item of content) {
   const categories = array<Item>(item.category)
   const status = value(item['wp:status']); const visibility = ['publish', 'draft', 'private', 'pending', 'future'].includes(status) ? status as 'publish' | 'draft' | 'private' | 'pending' | 'future' : 'draft'
   const found = await payload.find({ collection: 'content', where: { wordpressId: { equals: id } }, limit: 1 })
-  const visual = found.docs[0]?.useVisualEditor ? null : importedHtmlToLexical(html, mediaIdsByUrl, editorConfig)
+  const structured = value(item['wp:post_type']) === 'post' && !found.docs[0]?.useVisualEditor ? importedHtmlToSections(html, mediaIdsByUrl, editorConfig) : null
+  const visual = found.docs[0]?.useVisualEditor || structured?.sections.length ? null : importedHtmlToLexical(html, mediaIdsByUrl, editorConfig)
+  if (structured?.sections.length) report.push(`- ${route}: ${structured.sections.length} filas de dos columnas preparadas para edición visual.`)
+  if (structured?.missingImages.length) report.push(`- ${route}: ${structured.missingImages.length} imágenes requieren revisión en las secciones editables.`)
+  if (structured?.unsupportedEmbeds.length) report.push(`- ${route}: ${structured.unsupportedEmbeds.length} incrustaciones requieren revisión en las secciones editables.`)
   if (visual?.missingImages.length) report.push(`- ${route}: ${visual.missingImages.length} imágenes requieren revisión en el editor visual.`)
   if (visual?.unsupportedEmbeds.length) report.push(`- ${route}: ${visual.unsupportedEmbeds.length} videos incrustados se muestran como enlaces en el editor visual; el HTML original conserva la incrustación.`)
-  const data = { title: value(item.title) || `Sin título ${id}`, path: route, wordpressId: id, kind: value(item['wp:post_type']) as 'post' | 'page', visibility, publishedAt: value(item['wp:post_date_gmt']) && value(item['wp:post_date_gmt']) !== '0000-00-00 00:00:00' ? value(item['wp:post_date_gmt']).replace(' ', 'T') + 'Z' : undefined, authorName: value(item['dc:creator']), categories: categories.filter(c => c['@_domain'] === 'category').map(value).join(', '), tags: categories.filter(c => c['@_domain'] === 'post_tag').map(value).join(', '), html, ...(visual ? { body: visual.body } : {}), featuredImage: mediaIds.get(metadata._thumbnail_id) as number | undefined, seoTitle: metadata.rank_math_title || '', seoDescription: metadata.rank_math_description || '' }
+  const data = { title: value(item.title) || `Sin título ${id}`, path: route, wordpressId: id, kind: value(item['wp:post_type']) as 'post' | 'page', visibility, publishedAt: value(item['wp:post_date_gmt']) && value(item['wp:post_date_gmt']) !== '0000-00-00 00:00:00' ? value(item['wp:post_date_gmt']).replace(' ', 'T') + 'Z' : undefined, authorName: value(item['dc:creator']), categories: categories.filter(c => c['@_domain'] === 'category').map(value).join(', '), tags: categories.filter(c => c['@_domain'] === 'post_tag').map(value).join(', '), html, ...(structured?.sections.length ? { sections: structured.sections, body: null } : {}), ...(visual ? { body: visual.body } : {}), featuredImage: mediaIds.get(metadata._thumbnail_id) as number | undefined, seoTitle: metadata.rank_math_title || '', seoDescription: metadata.rank_math_description || '' }
   if (found.docs[0]) await payload.update({ collection: 'content', id: found.docs[0].id, data }); else await payload.create({ collection: 'content', data })
 }
 report.push('', `Registros de contenido procesados: ${content.length}`, `Adjuntos asociados importados: ${mediaIds.size}`, `Medios con archivo local verificado: ${mediaMap.size}`, `Archivos descargados o reparados en el volumen: ${downloaded}`, `Errores de medios o contenido: ${failed}`, '', 'Revisar los medios no públicos, el formulario, los títulos SEO con variables de Rank Math y los elementos que no aparezcan en content:encoded. La sincronización conserva el contenido visual de entradas que ya lo publicaron, pero sobrescribe sus demás campos importados.')
