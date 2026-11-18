@@ -35,14 +35,6 @@ La exportación encontrada contiene 12 entradas públicas, 6 páginas públicas,
 
 Si ejecutas la app fuera de Docker con `npm run dev`, configura `DATABASE_URL` hacia una instancia de PostgreSQL accesible desde tu PC y `PAYLOAD_SECRET` en `.env`. Para desplegar con Compose, basta con `POSTGRES_PASSWORD` y `PAYLOAD_SECRET`. `npm run typecheck` comprueba tipos y `npm run build` compila producción.
 
-## Reseñas de Google sin cargos de API
-
-La opción gratuita sin solicitar acceso a una API propia es [Revys Free](https://revys.io/en/pricing): una ficha, widgets y vistas ilimitados, diseño de carrusel y sincronización nocturna. Su [integración de Next.js](https://revys.io/en/integrations/nextjs) entrega el HTML por un ID público, sin clave de API ni tarjeta; incluye un crédito visible de Revys. Debes conectar la ficha de Fisio Invasiva con la cuenta de Google que la administra. La cuenta y la autorización se crean en Revys; el sitio no recibe tu contraseña.
-
-1. En Revys, conecta el Perfil de Empresa de Fisio Invasiva y crea un widget con diseño **Carousel**. Revys documenta las etiquetas del widget solo en inglés o francés; la web traduce las etiquetas habituales y muestra las fechas en español, mientras las reseñas conservan su idioma original. En **On my website → Put on my website**, copia solo el ID público que aparece en la URL `https://revys.io/api/embed/ID/html`.
-2. En el servidor, ejecuta `git pull`, agrega `REVYS_WIDGET_ID=ID` a `.env` y ejecuta `docker compose up -d --build` para instalar esta versión. Si luego cambias solo el ID, basta con `docker compose up -d --force-recreate app`; la variable se lee al servir la página.
-3. Abre la landing y `/testimonios/` en el subdominio y comprueba que se vean las reseñas, el carrusel y el enlace a Google. El carrusel usa las tarjetas y flechas del sitio, sin avance automático ni botón de pausa; mantiene visible el crédito obligatorio de Revys Free. El HTML se guarda en caché una hora y Revys sincroniza las nuevas reseñas cada noche. Si Revys no responde, el sitio conserva el carrusel propio cuando haya credenciales de Google o el enlace directo a las reseñas. Si Revys cambia el marcado del widget, revisa las traducciones y estilos locales.
-
 La opción anterior con [Google Business Profile API](https://developers.google.com/my-business/content/pricing) sigue disponible solo si Google aprueba tu proyecto. En ese caso, deja `REVYS_WIDGET_ID` vacío y sigue estos pasos:
 
 1. Con la cuenta propietaria o gestora de la ficha, crea un proyecto en Google Cloud y [solicita acceso básico a las Business Profile APIs](https://developers.google.com/my-business/content/prereqs). Espera la aprobación. Después habilita **Google My Business API**, **My Business Account Management API** y **My Business Business Information API**. No habilites Places API para este carrusel.
