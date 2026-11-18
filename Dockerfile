@@ -1,6 +1,7 @@
 FROM node:24-bookworm-slim AS builder
 WORKDIR /app
 COPY package*.json ./
+COPY .npmrc ./
 RUN npm ci
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1 PAYLOAD_SECRET=build-placeholder-not-used-at-runtime
