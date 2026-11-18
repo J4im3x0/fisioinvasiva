@@ -5,6 +5,11 @@ type EditorConfig = Awaited<ReturnType<typeof editorConfigFactory.default>>
 
 export function importedHtmlToLexical(html: string, mediaIdsByUrl: Map<string, number | string>, editorConfig: EditorConfig) {
   const dom = new JSDOM(html)
+  for (const link of dom.window.document.querySelectorAll('a')) {
+    const href = link.getAttribute('href')?.trim()
+    if (!href) link.replaceWith(...link.childNodes)
+    else if (/\s/.test(href)) link.setAttribute('href', encodeURI(href))
+  }
   const missingImages: string[] = []
   for (const image of dom.window.document.querySelectorAll('img')) {
     const src = image.getAttribute('src') || ''
@@ -24,7 +29,7 @@ export function importedHtmlToLexical(html: string, mediaIdsByUrl: Map<string, n
     const link = dom.window.document.createElement('a')
     link.href = src
     link.textContent = frame.getAttribute('title') || 'Ver video incrustado'
-    frame.replaceWith(link)
+    frame.replaceWith(src ? link : dom.window.document.createTextNode(link.textContent))
   }
   const body = convertHTMLToLexical({ editorConfig, html: dom.window.document.body.innerHTML, JSDOM })
   // Payload's HTML converter reads upload IDs as strings; PostgreSQL media IDs must stay numeric.

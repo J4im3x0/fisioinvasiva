@@ -7,7 +7,7 @@ import { convertLexicalToHTMLAsync } from '@payloadcms/richtext-lexical/html-asy
 import { importedHtmlToLexical } from '../src/lib/imported-html-to-lexical'
 
 const editorConfig = await editorConfigFactory.default({ config: await config })
-const html = '<h2>Tratamiento</h2><p>Texto <strong>importante</strong></p><ul><li>Beneficio</li></ul><img src="/api/media/file/foto.webp" alt="Tratamiento" /><iframe src="https://www.youtube.com/embed/abc" title="Video"></iframe>'
+const html = '<h2>Tratamiento</h2><p>Texto <strong>importante</strong> <a href="">sin destino</a> <a href="/ruta con espacio">enlace</a></p><ul><li>Beneficio</li></ul><img src="/api/media/file/foto.webp" alt="Tratamiento" /><iframe src="https://www.youtube.com/embed/abc" title="Video"></iframe>'
 const result = importedHtmlToLexical(html, new Map([['/api/media/file/foto.webp', 42]]), editorConfig)
 const nodes = JSON.stringify(result.body)
 assert.match(nodes, /"type":"heading"/)
@@ -17,6 +17,9 @@ assert.match(nodes, /"value":42/)
 assert.equal(isValidID(42, 'number'), true)
 assert.equal(isValidID('42', 'number'), false)
 assert.match(nodes, /"type":"link"/)
+assert.doesNotMatch(nodes, /"url":""/)
+assert.match(nodes, /"url":"\/ruta%20con%20espacio"/)
+assert.match(nodes, /sin destino/)
 assert.deepEqual(result.missingImages, [])
 assert.deepEqual(result.unsupportedEmbeds, ['https://www.youtube.com/embed/abc'])
 const populate = async <TData extends object = TypeWithID>(): Promise<TData | undefined> => ({ id: 42, url: '/api/media/file/foto.webp', alt: 'Tratamiento', mimeType: 'image/webp', width: 800, height: 500 }) as unknown as TData

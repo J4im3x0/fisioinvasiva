@@ -16,20 +16,26 @@ for (let page = 1; ; page++) {
 
 let converted = 0
 let skipped = 0
+let failed = 0
 let pendingImages = 0
 let pendingEmbeds = 0
 for (let page = 1; ; page++) {
   const result = await payload.find({ collection: 'content', page, limit: 100, depth: 0, sort: 'id' })
   for (const entry of result.docs) {
     if (!entry.html || entry.body) { skipped++; continue }
-    const visual = importedHtmlToLexical(entry.html, mediaIdsByUrl, editorConfig)
-    await payload.update({ collection: 'content', id: entry.id, data: { body: visual.body } })
-    converted++
-    pendingImages += visual.missingImages.length
-    pendingEmbeds += visual.unsupportedEmbeds.length
-    if (visual.missingImages.length || visual.unsupportedEmbeds.length) console.warn(`${entry.path}: revisar ${visual.missingImages.length} imágenes y ${visual.unsupportedEmbeds.length} videos en el editor visual`)
+    try {
+      const visual = importedHtmlToLexical(entry.html, mediaIdsByUrl, editorConfig)
+      await payload.update({ collection: 'content', id: entry.id, data: { body: visual.body } })
+      converted++
+      pendingImages += visual.missingImages.length
+      pendingEmbeds += visual.unsupportedEmbeds.length
+      if (visual.missingImages.length || visual.unsupportedEmbeds.length) console.warn(`${entry.path}: revisar ${visual.missingImages.length} imágenes y ${visual.unsupportedEmbeds.length} videos en el editor visual`)
+    } catch (error) {
+      failed++
+      console.error(`${entry.path}: ${error instanceof Error ? error.message : String(error)}`)
+    }
   }
   if (!result.hasNextPage) break
 }
-console.log(`Editor visual preparado: ${converted} contenidos; ${skipped} ya preparados o vacíos. Pendientes de revisión: ${pendingImages} imágenes y ${pendingEmbeds} videos.`)
-process.exit(0)
+console.log(`Editor visual preparado: ${converted} contenidos; ${skipped} ya preparados o vacíos; ${failed} errores. Pendientes de revisión: ${pendingImages} imágenes y ${pendingEmbeds} videos.`)
+process.exit(failed ? 1 : 0)
