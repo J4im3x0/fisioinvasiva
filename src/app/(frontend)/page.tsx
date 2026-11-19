@@ -104,6 +104,6 @@ export default async function Home() {
       </div>
     </section>
     <section className="testimonials"><div><h2>Testimonios</h2><p>Te invitamos a ver los testimonios y casos de éxito de nuestros pacientes, los cuales han podido vivir la experiencia de la terapia fisio invasiva que se combina con una kinesiología personalizada en cada caso; podrás conocer los resultados y resolutividad.</p><a className="button button-blue" href="/testimonios/">Conoce los testimonios</a></div><div className="reviews"><img src="/brand/reviews.webp" alt="Pacientes de Fisio Invasiva" loading="lazy" /><a className="rating" href={settings.googleReviewsUrl} aria-label="Ver reseñas de Fisio Invasiva en Google" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">★</span><strong>5,0</strong><small>Estamos orgullosos de nuestros resultados</small></a></div></section>
-    <GoogleReviews />
+    <GoogleReviews reviewUrl={settings.googleReviewsUrl} />
   </main>
 }

@@ -2,9 +2,16 @@ import './styles.css'
 import './institutional.css'
 import './refinement.css'
 import type { Metadata } from 'next'
+import { Plus_Jakarta_Sans } from 'next/font/google'
 import { DesktopNav, MobileMenu } from './site-nav'
 import WhatsAppWidget from './whatsapp-widget'
 import { buildWhatsAppUrl, getSiteSettings, phoneHref } from '@/lib/site-settings'
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Fisio Invasiva | Kinesiología y fisioterapia invasiva',
@@ -28,7 +35,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
 
   return (
     <html lang="es-CL">
-      <body>
+      <body className={jakarta.className}>
         <header className="header">
           <div className="header-inner">
             <MobileMenu links={menuLinks} />

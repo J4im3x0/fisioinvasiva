@@ -1,3 +1,4 @@
+import sanitizeHtml from 'sanitize-html'
 import { youtubeEmbedUrl } from './youtube-embed'
 
 type LexicalNode = {
@@ -33,6 +34,59 @@ export function hasLexicalContent(value: unknown): boolean {
   const root = (value as { root?: LexicalNode }).root
   const signal = collectLexicalSignals(root)
   return Boolean(signal.text || signal.hasMedia)
+}
+
+function collectLexicalTextParts(node?: LexicalNode | null, parts: string[] = []): string[] {
+  if (!node) return parts
+  if (typeof node.text === 'string' && node.text.trim()) parts.push(node.text.trim())
+  for (const child of node.children || []) collectLexicalTextParts(child, parts)
+  return parts
+}
+
+export function extractLexicalText(value: unknown): string {
+  if (!value || typeof value !== 'object') return ''
+  const root = (value as { root?: LexicalNode }).root
+  return collectLexicalTextParts(root).join(' ').replace(/\s+/g, ' ').trim()
+}
+
+export type ExcerptPostInput = {
+  seoDescription?: string | null
+  useVisualEditor?: boolean | null
+  sections?: Array<{
+    left?: { body?: unknown } | null
+    right?: { body?: unknown } | null
+  }> | null
+  body?: unknown
+  html?: string | null
+}
+
+export function getTreatmentExcerpt(post: ExcerptPostInput, maxLength = 155): string {
+  let raw = ''
+  if (post.useVisualEditor) {
+    if (Array.isArray(post.sections) && post.sections.length > 0) {
+      for (const section of post.sections) {
+        const leftText = extractLexicalText(section?.left?.body)
+        if (leftText) {
+          raw = leftText
+          break
+        }
+        const rightText = extractLexicalText(section?.right?.body)
+        if (rightText) {
+          raw = rightText
+          break
+        }
+      }
+    }
+    if (!raw && post.body) raw = extractLexicalText(post.body)
+  }
+  if (!raw && post.html) {
+    const summary = post.html.match(/<(?:h5|p)\b[^>]*>([\s\S]*?)<\/(?:h5|p)>/i)?.[1] || post.html
+    raw = sanitizeHtml(summary, { allowedTags: [], allowedAttributes: {} })
+  }
+  if (!raw && post.seoDescription) raw = post.seoDescription
+  const clean = raw.replace(/\s+/g, ' ').trim()
+  if (!clean) return ''
+  return clean.length > maxLength ? `${clean.slice(0, maxLength).trimEnd()}…` : clean
 }
 
 export function countGalleryImages(gallery?: Array<{ image?: unknown } | null> | null): number {

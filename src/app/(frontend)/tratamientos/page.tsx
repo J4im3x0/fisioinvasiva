@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import sanitizeHtml from 'sanitize-html'
+import { getTreatmentExcerpt } from '@/lib/section-editor-helpers'
 import { taxonomySlug, taxonomyValues, treatmentCategories } from '@/lib/treatment-taxonomy'
 
 export const metadata: Metadata = { title: 'Tratamientos - Fisio Invasiva' }
@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 export default async function Tratamientos({ searchParams }: { searchParams: Promise<{ categoria?: string; tag?: string; tags?: string }> }) {
   const { categoria, tag, tags } = await searchParams
   const payload = await getPayload({ config })
-  const result = await payload.find({ collection: 'content', where: { and: [{ kind: { equals: 'post' } }, { visibility: { equals: 'publish' } }] }, sort: '-publishedAt', limit: 1000, overrideAccess: false })
+  const result = await payload.find({ collection: 'content', where: { and: [{ kind: { equals: 'post' } }, { visibility: { equals: 'publish' } }] }, sort: '-publishedAt', limit: 1000, depth: 1, overrideAccess: false })
   const posts = result.docs
   const categories = [...new Set([...treatmentCategories, ...posts.flatMap(post => taxonomyValues(post.categories))])].filter(category => posts.some(post => taxonomyValues(post.categories).includes(category)))
   const tagValues = [...new Set(posts.flatMap(post => taxonomyValues(post.tags)))].sort((a, b) => a.localeCompare(b, 'es'))
@@ -27,9 +27,8 @@ export default async function Tratamientos({ searchParams }: { searchParams: Pro
       <nav className="treatment-filters" aria-label={showingTags ? 'Filtrar por etiqueta' : 'Filtrar por categoría'}><a href={showingTags ? '/tratamientos/?tags=1' : '/tratamientos/'} aria-current={!active ? 'page' : undefined}>Todo</a>{options.map(option => <a key={option} href={filterHref(option)} aria-current={active === option ? 'page' : undefined}>{option}</a>)}</nav>
       <div className="treatment-index-grid">{visible.map(post => {
         const media = typeof post.featuredImage === 'object' ? post.featuredImage : null
-        const summary = post.html?.match(/<(?:h5|p)\b[^>]*>([\s\S]*?)<\/(?:h5|p)>/i)?.[1] || post.html || ''
-        const description = sanitizeHtml(summary, { allowedTags: [], allowedAttributes: {} }).replace(/\s+/g, ' ').trim().slice(0, 155)
-        return <article className="treatment-index-card" key={post.id}><a className="treatment-index-image" href={post.path}>{media?.url && <img src={media.url} alt={media.alt || post.title} loading="lazy" />}</a><div className="treatment-index-copy"><span className="treatment-index-category">{taxonomyValues(post.categories).join(' · ')}</span><h2><a href={post.path}>{post.title}</a></h2><p>{description}{description.length === 155 ? '…' : ''}</p><a className="treatment-index-more" href={post.path}>Leer más →</a></div></article>
+        const description = getTreatmentExcerpt(post)
+        return <article className="treatment-index-card" key={post.id}><a className="treatment-index-image" href={post.path}>{media?.url && <img src={media.url} alt={media.alt || post.title} width={640} height={500} loading="lazy" decoding="async" />}</a><div className="treatment-index-copy"><span className="treatment-index-category">{taxonomyValues(post.categories).join(' · ')}</span><h2><a href={post.path}>{post.title}</a></h2><p>{description}</p><a className="treatment-index-more" href={post.path}>Leer más →</a></div></article>
       })}</div>
       {!visible.length && <p>No hay tratamientos publicados para este filtro.</p>}
     </div>

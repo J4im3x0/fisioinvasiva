@@ -1,18 +1,20 @@
 import GoogleReviewsCarousel from './google-reviews-carousel'
 import RevysControls from './revys-controls'
 import { revysReviewsHtml } from '@/lib/revys-reviews'
+import { getSiteSettings } from '@/lib/site-settings'
 
-export default async function GoogleReviews() {
+export default async function GoogleReviews({ reviewUrl }: { reviewUrl?: string } = {}) {
+  const targetUrl = reviewUrl || (await getSiteSettings()).googleReviewsUrl
   const widgetId = process.env.REVYS_WIDGET_ID
   const html = widgetId ? await revysReviewsHtml(widgetId) : null
-  if (!html) return <GoogleReviewsCarousel />
+  if (!html) return <GoogleReviewsCarousel fallbackUrl={targetUrl} />
 
   // shortcut: Revys controls the HTML classes, so revisit local styles if its fragment changes.
   return <section className="google-reviews google-reviews--revys" id="google-reviews">
     <div className="google-reviews-heading">
       <img src="/brand/google-maps-logo.svg" alt="Google Maps" width="98" height="18" loading="lazy" />
       <h2>Reseñas de pacientes en Google</h2>
-      <a className="button button-blue" href="https://share.google/ay32o4HwwQOiA1uTV" target="_blank" rel="noopener noreferrer">Ver todas en Google</a>
+      <a className="button button-blue" href={targetUrl} target="_blank" rel="noopener noreferrer">Ver todas en Google</a>
     </div>
     <RevysControls />
     <div className="revys-reviews" dangerouslySetInnerHTML={{ __html: html }} />

@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { getPayload, type Payload } from 'payload'
 import config from '@payload-config'
 import {
@@ -9,7 +10,7 @@ import {
 
 export * from './site-settings-shared'
 
-export async function getSiteSettings(existingPayload?: Payload): Promise<ResolvedSiteSettings> {
+async function fetchSiteSettings(existingPayload?: Payload): Promise<ResolvedSiteSettings> {
   try {
     const payload = existingPayload || (await getPayload({ config }))
     const doc = await payload.findGlobal({ slug: 'site-settings', depth: 0 })
@@ -17,6 +18,12 @@ export async function getSiteSettings(existingPayload?: Payload): Promise<Resolv
   } catch {
     return DEFAULT_SITE_SETTINGS
   }
+}
+
+const loadCachedSiteSettings = cache(async () => fetchSiteSettings())
+
+export async function getSiteSettings(existingPayload?: Payload): Promise<ResolvedSiteSettings> {
+  return existingPayload ? fetchSiteSettings(existingPayload) : loadCachedSiteSettings()
 }
 
 export async function recordSiteEvent(

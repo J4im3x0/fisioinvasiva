@@ -53,6 +53,29 @@ p { text-wrap: pretty; }
 .section-intro h2, .pricing h2, .testimonials h2 { font-size: clamp(32px, 3.3vw, 48px); letter-spacing: -.03em; }
 .section-intro p { max-width: 70ch; margin-inline: auto; font-size: 16px; line-height: 1.65; }
 .treatment-carousel { max-width: var(--content); }
+/* Lock Swiper slide geometry in CSS before JS hydration so reload never flashes a 100%-wide card. */
+.treatment-cards { overflow: hidden; }
+.treatment-cards:not(.swiper-initialized) > .swiper-wrapper {
+  display: flex;
+  overflow: hidden;
+}
+.treatment-cards:not(.swiper-initialized) .swiper-slide {
+  width: 100%;
+  margin-right: 14px;
+  flex-shrink: 0;
+}
+@media (min-width: 761px) and (max-width: 1050px) {
+  .treatment-cards:not(.swiper-initialized) .swiper-slide {
+    width: calc((100% - 30px) / 2);
+    margin-right: 30px;
+  }
+}
+@media (min-width: 1051px) {
+  .treatment-cards:not(.swiper-initialized) .swiper-slide {
+    width: calc((100% - 60px) / 3);
+    margin-right: 30px;
+  }
+}
 .treatment-arrow-prev { left: -42px; }
 .treatment-arrow-next { right: -42px; }
 .treatment-arrow { width: 42px; height: 42px; border-radius: 50%; background: #fff; color: #2f6ca7; font-size: 32px; line-height: 1; box-shadow: 0 4px 14px #193d6d24; }
@@ -61,7 +84,7 @@ p { text-wrap: pretty; }
 .treatment-dots button::before { content: ''; width: 7px; height: 7px; border-radius: 7px; background: #8fa7ba; }
 .treatment-dots button[aria-current=true]::before { width: 18px; background: #24477f; }
 .treatment-card { border-radius: 16px; }
-.treatment-card > img { aspect-ratio: 1.55; }
+.treatment-card-image > img { aspect-ratio: 1.55; }
 .treatment-card-copy { padding: 22px 20px 25px; }
 .treatment-card h3 { min-height: 2.4em; margin-bottom: 12px; font-size: clamp(19px, 1.7vw, 23px); }
 .treatment-card p { margin-bottom: 18px; font-size: 14px; line-height: 1.5; }
@@ -141,9 +164,11 @@ footer img, .footer-brand { display: block; }
 .directory-heading { max-width: var(--content); margin: 56px auto 52px; }
 .directory-heading h1 { font-weight: 700; }
 .directory-inner, .treatment-article-inner { max-width: var(--content); }
+.treatment-filters { grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); }
 .treatment-filters a { border-radius: 8px; }
 .treatment-index-grid { gap: 36px 22px; }
 .treatment-index-card { border-radius: 16px; overflow: hidden; background: #f7fafc; }
+.treatment-index-image { aspect-ratio: 1.28; overflow: hidden; }
 .treatment-index-copy { padding: 22px; }
 .treatment-index-card h2 { font-size: 24px; }
 .article { max-width: 940px; padding: 64px var(--gutter) 100px; }
@@ -161,8 +186,14 @@ footer img, .footer-brand { display: block; }
   .mobile-menu nav { max-height: calc(100dvh - 100px); overflow-y: auto; }
   .brand { margin-right: auto; }
   .header-cta { display: inline-flex !important; }
+  .hero { min-height: 500px; }
+  .hero-image { height: 440px; }
+  .price-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
   .treatment-arrow-prev { left: -25px; }
   .treatment-arrow-next { right: -25px; }
+}
+@media (max-width: 900px) {
+  .contact-columns, .testimonials-intro, .about-intro { grid-template-columns: 1fr; gap: 32px; }
 }
 @media (max-width: 760px) {
   :root { --gutter: 20px; }
@@ -196,9 +227,9 @@ footer img, .footer-brand { display: block; }
   .treatments .section-intro p { font-size: 15px; line-height: 1.55; }
   .treatment-carousel { padding-bottom: 35px; }
   .treatment-arrow { top: 45%; }
-  .treatment-arrow-prev { left: -22px; }
-  .treatment-arrow-next { right: -22px; }
-  .treatment-card > img { aspect-ratio: 1.45; }
+  .treatment-arrow-prev { left: -10px; }
+  .treatment-arrow-next { right: -10px; }
+  .treatment-card-image > img { aspect-ratio: 1.45; }
   .treatment-card h3 { min-height: 0; font-size: 21px; }
   .treatment-card p { font-size: 14px; }
   .treatment-more, .treatments + .treatments .treatment-more, .treatments:has(+ .treatments) .treatment-more { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; margin-top: 20px; }

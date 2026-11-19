@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-const reviewUrl = 'https://share.google/ay32o4HwwQOiA1uTV'
+const defaultReviewUrl = 'https://share.google/ay32o4HwwQOiA1uTV'
 
 type Review = {
   id?: string
@@ -21,7 +21,7 @@ type ReviewData = {
   reviews?: Review[]
 }
 
-export default function GoogleReviews() {
+export default function GoogleReviews({ fallbackUrl = defaultReviewUrl }: { fallbackUrl?: string }) {
   const section = useRef<HTMLElement>(null)
   const track = useRef<HTMLDivElement>(null)
   const paused = useRef(false)
@@ -104,7 +104,7 @@ export default function GoogleReviews() {
       <img src="/brand/google-maps-logo.svg" alt="Google Maps" width="98" height="18" loading="lazy" />
       <h2>Reseñas de pacientes en Google</h2>
       {data?.status === 'ok' && data.rating != null && <p>{data.rating.toLocaleString('es-CL', { maximumFractionDigits: 1 })} de 5 · {data.count?.toLocaleString('es-CL')} reseñas</p>}
-      <a className="button button-blue" href={data?.url || reviewUrl} target="_blank" rel="noopener noreferrer">Ver todas en Google</a>
+      <a className="button button-blue" href={data?.url || fallbackUrl} target="_blank" rel="noopener noreferrer">Ver todas en Google</a>
     </div>
     {data && !reviews.length && <p className="google-reviews-empty">Las reseñas están disponibles en nuestro perfil de Google.</p>}
     {reviews.length > 0 && <div className="google-review-carousel" onMouseEnter={() => { paused.current = true }} onMouseLeave={() => { paused.current = false }} onFocusCapture={() => { paused.current = true }} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) paused.current = false }}>

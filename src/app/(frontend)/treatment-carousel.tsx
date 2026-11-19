@@ -41,8 +41,14 @@ export default function TreatmentCarousel({ items, title }: { items: Treatment[]
       onSlideChange={instance => setActive(instance.realIndex)}
     >
       {items.map((item, index) => <SwiperSlide key={item.href} role="group" aria-roledescription="diapositiva" aria-label={`${index + 1} de ${items.length}`}><article className="treatment-card">
-        <img src={`/brand/${item.image}`} alt="" loading="lazy" />
-        <div className="treatment-card-copy"><h3>{item.title}</h3><p>{item.description}</p><a href={item.href} aria-label={`Ver más sobre ${item.title}`}>Ver más</a></div>
+        <a className="treatment-card-image" href={item.href} tabIndex={-1} aria-hidden="true">
+          <img src={`/brand/${item.image}`} alt={item.title} width={600} height={387} loading="lazy" decoding="async" />
+        </a>
+        <div className="treatment-card-copy">
+          <h3><a className="treatment-card-title" href={item.href}>{item.title}</a></h3>
+          <p>{item.description}</p>
+          <a className="treatment-card-more" href={item.href} aria-label={`Ver más sobre ${item.title}`}>Ver más</a>
+        </div>
       </article></SwiperSlide>)}
     </Swiper>
     <button className="treatment-arrow treatment-arrow-prev" type="button" aria-label={`Tratamientos anteriores: ${title}`} onClick={() => move('prev')}>‹</button>

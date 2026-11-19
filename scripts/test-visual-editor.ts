@@ -6,7 +6,7 @@ import { editorConfigFactory } from '@payloadcms/richtext-lexical'
 import { convertLexicalToHTMLAsync } from '@payloadcms/richtext-lexical/html-async'
 import { importedHtmlToLexical } from '../src/lib/imported-html-to-lexical'
 import { importedHtmlToSections } from '../src/lib/imported-html-to-sections'
-import { hasLexicalContent, summarizeColumn, swapSectionColumnsState } from '../src/lib/section-editor-helpers'
+import { getTreatmentExcerpt, hasLexicalContent, summarizeColumn, swapSectionColumnsState } from '../src/lib/section-editor-helpers'
 import { youtubeEmbedUrl } from '../src/lib/youtube-embed'
 
 const editorConfig = await editorConfigFactory.default({ config: await config })
@@ -76,5 +76,35 @@ assert.deepEqual(swapped['right.gallery.0.image'], { value: 42 })
 assert.deepEqual(swapped['left.body'], { value: 'right-body' })
 assert.deepEqual(swapped['left.gallery'], { value: 0, rows: [] })
 assert.equal('sections.1.left.body' in swapped, false)
+
+// Treatment excerpt extraction
+assert.equal(
+  getTreatmentExcerpt({
+    useVisualEditor: true,
+    sections: structured.sections,
+    html: '<p>Texto antiguo</p>',
+    seoDescription: 'Meta descripción',
+  }),
+  'Primero Nota clínica',
+)
+assert.equal(
+  getTreatmentExcerpt({
+    useVisualEditor: false,
+    sections: structured.sections,
+    html: '<h5>Resumen desde HTML importado</h5><p>Segundo párrafo</p>',
+    seoDescription: 'Meta descripción',
+  }),
+  'Resumen desde HTML importado',
+)
+assert.equal(
+  getTreatmentExcerpt({
+    useVisualEditor: true,
+    sections: [],
+    body: emptyLexical,
+    html: '',
+    seoDescription: 'Descripción SEO de respaldo',
+  }),
+  'Descripción SEO de respaldo',
+)
 
 console.log('Conversión de HTML importado a editor visual: OK')
