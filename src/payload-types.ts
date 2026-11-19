@@ -70,6 +70,7 @@ export interface Config {
     users: User;
     media: Media;
     content: Content;
+    'site-events': SiteEvent;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -80,6 +81,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     content: ContentSelect<false> | ContentSelect<true>;
+    'site-events': SiteEventsSelect<false> | SiteEventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -89,8 +91,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-settings': SiteSetting;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -270,6 +276,18 @@ export interface Content {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-events".
+ */
+export interface SiteEvent {
+  id: number;
+  kind: 'agenda_click' | 'whatsapp_open' | 'whatsapp_click' | 'contact_submit' | 'treatment_view';
+  path?: string | null;
+  label?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -303,6 +321,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'content';
         value: number | Content;
+      } | null)
+    | ({
+        relationTo: 'site-events';
+        value: number | SiteEvent;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -445,6 +467,17 @@ export interface ContentSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-events_select".
+ */
+export interface SiteEventsSelect<T extends boolean = true> {
+  kind?: T;
+  path?: T;
+  label?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -482,6 +515,107 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  whatsappEnabled?: boolean | null;
+  /**
+   * Ejemplo: +56 9 3863 0890 (sin espacios también funciona).
+   */
+  whatsappPhone?: string | null;
+  whatsappHeaderTitle?: string | null;
+  /**
+   * Usa **texto** para resaltar palabras en negrita (ej. **Fisio Invasiva**).
+   */
+  whatsappGreeting1?: string | null;
+  whatsappGreeting2?: string | null;
+  whatsappButtonText?: string | null;
+  /**
+   * Este texto aparecerá listo para enviar cuando el paciente presione "Abrir chat".
+   */
+  whatsappPrefillMessage?: string | null;
+  /**
+   * Destino al que redirige /agenda en todos los botones del sitio.
+   */
+  bookingUrl?: string | null;
+  bookingCtaText?: string | null;
+  phoneDisplay?: string | null;
+  email?: string | null;
+  address?: string | null;
+  hours?: string | null;
+  mapsUrl?: string | null;
+  instagramUrl?: string | null;
+  googleReviewsUrl?: string | null;
+  /**
+   * Usa **palabra** para resaltarla en verde (ej. Somos **especialistas** y **pioneros**).
+   */
+  heroTitle?: string | null;
+  heroSubtitle?: string | null;
+  aboutQuote?: string | null;
+  aboutSignature?: string | null;
+  aboutCredentials?: string | null;
+  visitHeading?: string | null;
+  pricingIntro?: string | null;
+  pricingPlans?:
+    | {
+        badge?: string | null;
+        title: string;
+        price: string;
+        subnote?: string | null;
+        highlighted?: boolean | null;
+        features?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  whatsappEnabled?: T;
+  whatsappPhone?: T;
+  whatsappHeaderTitle?: T;
+  whatsappGreeting1?: T;
+  whatsappGreeting2?: T;
+  whatsappButtonText?: T;
+  whatsappPrefillMessage?: T;
+  bookingUrl?: T;
+  bookingCtaText?: T;
+  phoneDisplay?: T;
+  email?: T;
+  address?: T;
+  hours?: T;
+  mapsUrl?: T;
+  instagramUrl?: T;
+  googleReviewsUrl?: T;
+  heroTitle?: T;
+  heroSubtitle?: T;
+  aboutQuote?: T;
+  aboutSignature?: T;
+  aboutCredentials?: T;
+  visitHeading?: T;
+  pricingIntro?: T;
+  pricingPlans?:
+    | T
+    | {
+        badge?: T;
+        title?: T;
+        price?: T;
+        subnote?: T;
+        highlighted?: T;
+        features?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

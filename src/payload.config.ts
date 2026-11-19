@@ -7,12 +7,21 @@ import sharp from 'sharp'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Content } from './collections/Content'
+import { SiteEvents } from './collections/SiteEvents'
+import { SiteSettings } from './globals/SiteSettings'
 import { migrations } from './migrations'
 
 export default buildConfig({
-  admin: { user: Users.slug, importMap: { baseDir: path.resolve('src') } },
+  admin: {
+    user: Users.slug,
+    importMap: { baseDir: path.resolve('src') },
+    components: {
+      beforeDashboard: ['/components/admin/ClinicDashboard#ClinicDashboard'],
+    },
+  },
   i18n: { supportedLanguages: { es }, fallbackLanguage: 'es' },
-  collections: [Users, Media, Content],
+  collections: [Users, Media, Content, SiteEvents],
+  globals: [SiteSettings],
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
   }),
