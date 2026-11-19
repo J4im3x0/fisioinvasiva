@@ -1,6 +1,6 @@
 import GoogleReviews from './google-reviews'
 import TreatmentCarousel from './treatment-carousel'
-import { buildWhatsAppUrl, getSiteSettings, parseInlineBold } from '@/lib/site-settings'
+import { getSiteSettings, parseInlineBold } from '@/lib/site-settings'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,11 +40,6 @@ function TreatmentSection({ title, description, items, moreTitle }: { title: str
 export default async function Home() {
   const settings = await getSiteSettings()
   const heroTitleParts = parseInlineBold(settings.heroTitle)
-  const fonasaWhatsappUrl =
-    buildWhatsAppUrl(
-      settings.whatsappPhone,
-      'Hola, soy paciente Fonasa y me gustaría consultar por el descuento preferencial y agendar una hora.',
-    ) || '/agenda'
 
   return <main>
     <link rel="preload" as="image" href="/brand/fondo-azul.webp" fetchPriority="high" />
@@ -125,15 +120,6 @@ export default async function Home() {
           <p>
             Las sesiones se abonan de forma particular y emitimos boleta de kinesiología para que puedas{' '}
             <strong>reembolsar en todas las Isapres y seguros complementarios</strong> presentando tu orden médica.
-            Si no tienes Isapre,{' '}
-            <a
-              href={fonasaWhatsappUrl}
-              target={fonasaWhatsappUrl.startsWith('https://') ? '_blank' : undefined}
-              rel={fonasaWhatsappUrl.startsWith('https://') ? 'noopener noreferrer' : undefined}
-            >
-              pide tu descuento Fonasa por WhatsApp
-            </a>
-            .
           </p>
         </div>
         <ul className="reimbursement-logos" aria-label="Isapres y Fonasa">
