@@ -41,7 +41,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .hero h1 span { color:var(--green); }
 .hero-image { width:100%; height:650px; object-fit:contain; object-position:center bottom; align-self:end; }
 .about { max-width:1380px; margin:auto; padding:70px 5% 130px; display:grid; grid-template-columns:34% 1fr; align-items:center; gap:9%; }
-.about-portrait { width:min(100%,350px); display:block; }
+.about-portrait { width:min(100%,350px); height:auto; display:block; }
 .about-copy { max-width:760px; }
 .quote-icon { width:72px; height:auto; margin-bottom:35px; }
 .about h2 { font-size:clamp(20px,1.7vw,24px); letter-spacing:-.035em; line-height:1.3; margin:0 0 55px; }

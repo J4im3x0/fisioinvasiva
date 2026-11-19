@@ -1,8 +1,18 @@
 import GoogleReviews from './google-reviews'
 import TreatmentCarousel from './treatment-carousel'
-import { getSiteSettings, parseInlineBold } from '@/lib/site-settings'
+import { buildWhatsAppUrl, getSiteSettings, parseInlineBold } from '@/lib/site-settings'
 
 export const dynamic = 'force-dynamic'
+
+const convenios = [
+  { name: 'Isapre Colmena', logo: '/brand/convenios/colmena.webp', width: 238, height: 64 },
+  { name: 'Isapre CruzBlanca', logo: '/brand/convenios/cruzblanca.webp', width: 253, height: 86 },
+  { name: 'Isapre Nueva Masvida', logo: '/brand/convenios/nuevamasvida.webp', width: 216, height: 76 },
+  { name: 'Isapre Consalud', logo: '/brand/convenios/consalud.webp', width: 271, height: 94 },
+  { name: 'Isapre Banmédica', logo: '/brand/convenios/banmedica.webp', width: 198, height: 66 },
+  { name: 'Isapre Vida Tres', logo: '/brand/convenios/vidatres.webp', width: 235, height: 59 },
+  { name: 'Fonasa', logo: '/brand/convenios/fonasa.svg', width: 240, height: 82 },
+]
 
 const invasivos = [
   { title: 'Electrólisis percutánea', image: 'electrolisis.webp', href: '/electrolisis-percutanea/', description: 'Electrólisis percutánea (EPI-EPM ECO ®). Técnica efectiva y de rápida aplicación.' },
@@ -30,8 +40,14 @@ function TreatmentSection({ title, description, items, moreTitle }: { title: str
 export default async function Home() {
   const settings = await getSiteSettings()
   const heroTitleParts = parseInlineBold(settings.heroTitle)
+  const fonasaWhatsappUrl =
+    buildWhatsAppUrl(
+      settings.whatsappPhone,
+      'Hola, soy paciente Fonasa y me gustaría consultar por el descuento preferencial y agendar una hora.',
+    ) || '/agenda'
 
   return <main>
+    <link rel="preload" as="image" href="/brand/fondo-azul.webp" fetchPriority="high" />
     <section className="hero">
       <div className="hero-copy">
         <h1>
@@ -42,12 +58,12 @@ export default async function Home() {
         <p>{settings.heroSubtitle}</p>
         <a className="button button-orange" href="/agenda">{settings.bookingCtaText}</a>
       </div>
-      <img className="hero-image" src="/brand/portada.webp" alt="Equipo de fisioterapia invasiva" width="520" height="650" fetchPriority="high" />
+      <img className="hero-image" src="/brand/portada.webp" alt="Equipo de fisioterapia invasiva" width="464" height="580" fetchPriority="high" />
     </section>
     <section className="about" aria-label="Nuestro enfoque">
-      <img className="about-portrait" src="/brand/perfil.webp" alt={settings.aboutSignature} loading="lazy" />
+      <img className="about-portrait" src="/brand/perfil.webp" alt={settings.aboutSignature} width="400" height="431" loading="lazy" />
       <div className="about-copy">
-        <img className="quote-icon" src="/brand/comentario.webp" alt="" />
+        <img className="quote-icon" src="/brand/comentario.webp" alt="" width="82" height="75" loading="lazy" />
         <h2>{settings.aboutQuote}</h2>
         <p className="signature">
           {settings.aboutSignature}
@@ -102,8 +118,41 @@ export default async function Home() {
           </article>
         ))}
       </div>
+      <div className="reimbursement-card" aria-label="Reembolso con Isapres y convenio Fonasa">
+        <div className="reimbursement-copy">
+          <span className="reimbursement-eyebrow">Modalidad particular con reembolso</span>
+          <h3>Reembolsable con Isapre</h3>
+          <p>
+            Las sesiones se abonan de forma particular y emitimos boleta de kinesiología para que puedas{' '}
+            <strong>reembolsar en todas las Isapres y seguros complementarios</strong> presentando tu orden médica.
+            Si no tienes Isapre,{' '}
+            <a
+              href={fonasaWhatsappUrl}
+              target={fonasaWhatsappUrl.startsWith('https://') ? '_blank' : undefined}
+              rel={fonasaWhatsappUrl.startsWith('https://') ? 'noopener noreferrer' : undefined}
+            >
+              pide tu descuento Fonasa por WhatsApp
+            </a>
+            .
+          </p>
+        </div>
+        <ul className="reimbursement-logos" aria-label="Isapres y Fonasa">
+          {convenios.map(item => (
+            <li key={item.name} className="reimbursement-logo-item">
+              <img
+                src={item.logo}
+                alt={item.name}
+                width={item.width}
+                height={item.height}
+                loading="lazy"
+                decoding="async"
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
-    <section className="testimonials"><div><h2>Testimonios</h2><p>Te invitamos a ver los testimonios y casos de éxito de nuestros pacientes, los cuales han podido vivir la experiencia de la terapia fisio invasiva que se combina con una kinesiología personalizada en cada caso; podrás conocer los resultados y resolutividad.</p><a className="button button-blue" href="/testimonios/">Conoce los testimonios</a></div><div className="reviews"><img src="/brand/reviews.webp" alt="Pacientes de Fisio Invasiva" loading="lazy" /><a className="rating" href={settings.googleReviewsUrl} aria-label="Ver reseñas de Fisio Invasiva en Google" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">★</span><strong>5,0</strong><small>Estamos orgullosos de nuestros resultados</small></a></div></section>
+    <section className="testimonials"><div><h2>Testimonios</h2><p>Te invitamos a ver los testimonios y casos de éxito de nuestros pacientes, los cuales han podido vivir la experiencia de la terapia fisio invasiva que se combina con una kinesiología personalizada en cada caso; podrás conocer los resultados y resolutividad.</p><a className="button button-blue" href="/testimonios/">Conoce los testimonios</a></div><div className="reviews"><img src="/brand/reviews.webp" alt="Pacientes de Fisio Invasiva" width="780" height="605" loading="lazy" /><a className="rating" href={settings.googleReviewsUrl} aria-label="Ver reseñas de Fisio Invasiva en Google" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">★</span><strong>5,0</strong><small>Estamos orgullosos de nuestros resultados</small></a></div></section>
     <GoogleReviews reviewUrl={settings.googleReviewsUrl} />
   </main>
 }

@@ -1,3 +1,4 @@
+import 'swiper/css'
 import './styles.css'
 import './institutional.css'
 import './refinement.css'
@@ -40,7 +41,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
           <div className="header-inner">
             <MobileMenu links={menuLinks} />
             <a className="brand" href="/" aria-label="Fisio Invasiva, inicio">
-              <img src="/brand/logo.webp" alt="Fisio Invasiva" />
+              <img src="/brand/logo.webp" alt="Fisio Invasiva" width="250" height="131" />
             </a>
             <DesktopNav links={links} />
             <a className="header-phone" href={telHref}>
@@ -62,7 +63,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
         <footer>
           <div className="footer-contact">
             <a className="footer-brand" href="/" aria-label="Fisio Invasiva, inicio">
-              <img src="/brand/logo.webp" alt="" loading="lazy" width="180" height="100" />
+              <img src="/brand/logo.webp" alt="" loading="lazy" width="250" height="131" />
             </a>
             <p>{settings.address}</p>
             <p>{settings.hours}</p>
