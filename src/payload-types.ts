@@ -173,17 +173,8 @@ export interface Media {
 export interface Content {
   id: number;
   title: string;
-  path: string;
-  wordpressId?: number | null;
-  kind: 'post' | 'page';
-  visibility: 'publish' | 'draft' | 'private' | 'pending' | 'future';
-  publishedAt?: string | null;
-  authorName?: string | null;
-  categories?: string | null;
-  tags?: string | null;
-  featuredImage?: (number | null) | Media;
   /**
-   * Cada fila corresponde a una sección de la página. Las columnas se muestran en el mismo orden que en la web.
+   * Cada fila se muestra en 2 columnas lado a lado, igual que en la web. Arrastra las filas para reordenar o usa "Intercambiar columnas" dentro de cada fila.
    */
   sections?:
     | {
@@ -241,7 +232,7 @@ export interface Content {
       }[]
     | null;
   /**
-   * Para artículos sin secciones de dos columnas.
+   * Para páginas simples o artículos importados sin secciones de dos columnas.
    */
   body?: {
     root: {
@@ -258,13 +249,22 @@ export interface Content {
     };
     [k: string]: unknown;
   } | null;
-  /**
-   * Guarda primero y usa Vista previa para revisar las secciones. Activa esta opción cuando quieras reemplazar la versión original de WordPress.
-   */
-  useVisualEditor?: boolean | null;
-  html?: string | null;
+  categories?: string | null;
+  tags?: string | null;
+  authorName?: string | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
+  wordpressId?: number | null;
+  visibility: 'publish' | 'draft' | 'private' | 'pending' | 'future';
+  /**
+   * Guarda primero y usa "Vista previa" para revisar. Activa esta casilla cuando quieras publicar la versión editable en la web.
+   */
+  useVisualEditor?: boolean | null;
+  path: string;
+  kind: 'post' | 'page';
+  featuredImage?: (number | null) | Media;
+  publishedAt?: string | null;
+  html?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -395,15 +395,6 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface ContentSelect<T extends boolean = true> {
   title?: T;
-  path?: T;
-  wordpressId?: T;
-  kind?: T;
-  visibility?: T;
-  publishedAt?: T;
-  authorName?: T;
-  categories?: T;
-  tags?: T;
-  featuredImage?: T;
   sections?:
     | T
     | {
@@ -436,10 +427,19 @@ export interface ContentSelect<T extends boolean = true> {
         id?: T;
       };
   body?: T;
-  useVisualEditor?: T;
-  html?: T;
+  categories?: T;
+  tags?: T;
+  authorName?: T;
   seoTitle?: T;
   seoDescription?: T;
+  wordpressId?: T;
+  visibility?: T;
+  useVisualEditor?: T;
+  path?: T;
+  kind?: T;
+  featuredImage?: T;
+  publishedAt?: T;
+  html?: T;
   updatedAt?: T;
   createdAt?: T;
 }

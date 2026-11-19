@@ -148,6 +148,7 @@ footer img, .footer-brand { display: block; }
 .treatment-index-card h2 { font-size: 24px; }
 .article { max-width: 940px; padding: 64px var(--gutter) 100px; }
 .article-content { max-width: 70ch; line-height: 1.7; }
+.treatment-article .treatment-content { width: 100%; max-width: none; margin-inline: auto; }
 .article-content p { margin: 0 0 1.4em; }
 
 @media (max-width: 1250px) {

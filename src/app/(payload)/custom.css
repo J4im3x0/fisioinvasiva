@@ -1,0 +1,214 @@
+/* 2-column treatment editor layout & visual helpers */
+.treatment-sections-array .array-field__draggable-rows {
+  gap: 14px;
+}
+
+.treatment-sections-array .collapsible__header {
+  background: var(--theme-elevation-50);
+}
+
+.section-row-label {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.section-row-label__index {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--theme-elevation-150);
+  color: var(--theme-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.section-row-label__col {
+  color: var(--theme-elevation-800);
+}
+
+.section-row-label__col em {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--theme-elevation-500);
+  margin-right: 4px;
+}
+
+.section-row-label__sep {
+  color: var(--theme-elevation-300);
+}
+
+.section-row-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  background: var(--theme-elevation-50);
+  border: 1px solid var(--theme-elevation-150);
+}
+
+.section-row-toolbar__hint {
+  font-size: 12px;
+  color: var(--theme-elevation-600);
+}
+
+.section-row-toolbar__swap {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 5px;
+  border: 1px solid var(--theme-elevation-250);
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.section-row-toolbar__swap:hover {
+  background: var(--theme-elevation-100);
+  border-color: var(--theme-elevation-400);
+}
+
+.section-row-toolbar__swap:focus-visible {
+  outline: 2px solid var(--theme-elevation-700);
+  outline-offset: 2px;
+}
+
+/* Force true 2-column 50/50 grid mirroring the public treatment page */
+.treatment-columns-row > .row__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+  margin-inline: 0;
+  margin-bottom: 0;
+}
+
+.treatment-columns-row > .row__fields > * {
+  min-width: 0;
+  width: auto;
+  max-width: none;
+  margin-inline: 0;
+}
+
+.treatment-column-card {
+  background: var(--theme-elevation-50);
+  border: 1px solid var(--theme-elevation-150);
+  border-top: 3px solid var(--theme-elevation-300);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.treatment-column-card--left {
+  border-top-color: #2b6cf5;
+}
+
+.treatment-column-card--right {
+  border-top-color: #568bbf;
+}
+
+.treatment-column-card > .group-field__wrap > .group-field__header {
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--theme-elevation-150);
+}
+
+.treatment-column-card > .group-field__wrap > .group-field__header .group-field__title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--theme-elevation-700);
+}
+
+/* Keep Lexical fixed toolbar tidy inside 50% columns */
+.treatment-column-card .fixed-toolbar {
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+
+.treatment-column-card .ContentEditable__root {
+  min-height: 150px;
+}
+
+.treatment-column-media {
+  margin-top: 8px;
+}
+
+.treatment-column-media .collapsible__header {
+  background: var(--theme-bg);
+}
+
+.column-media-label {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.column-media-label__title {
+  font-weight: 600;
+}
+
+.column-media-label__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--theme-elevation-150);
+  color: var(--theme-elevation-600);
+}
+
+.column-media-label__badge--active {
+  background: rgba(43, 108, 245, 0.14);
+  color: #2b6cf5;
+}
+
+html[data-theme='dark'] .column-media-label__badge--active {
+  background: rgba(96, 152, 255, 0.2);
+  color: #8bb5ff;
+}
+
+.youtube-field-preview {
+  margin-top: 10px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--theme-elevation-150);
+  background: #000;
+}
+
+.youtube-field-preview--portrait {
+  max-width: 220px;
+  aspect-ratio: 9 / 16;
+}
+
+.youtube-field-preview iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+@media (max-width: 1024px) {
+  .treatment-columns-row > .row__fields {
+    grid-template-columns: 1fr;
+  }
+}
